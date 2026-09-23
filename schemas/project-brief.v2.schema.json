@@ -11,12 +11,12 @@
     "solution": {"type": "string", "minLength": 1},
     "mechanism": {"type": "array", "items": {"type": "string"}},
     "evidence": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/evidence"}},
-    "boundaries": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "boundaries": {"type": "array", "minItems": 1, "description": "Complete source-mapped boundary inventory. Every entry must appear verbatim in the target README for helper versions 0.4.1 and later.", "items": {"type": "string", "minLength": 1}},
     "must_preserve": {
       "type": "array",
       "minItems": 1,
       "maxItems": 8,
-      "description": "Evidence-backed boundary sentences that the generated README must state verbatim. Required by CGM helper versions 0.4.1 and later.",
+      "description": "Evidence-backed boundary sentences selected from boundaries; every entry must exactly match a declared boundary and the generated README must state it verbatim. Required by CGM helper versions 0.4.1 and later.",
       "items": {"type": "string", "minLength": 1}
     },
     "terminology": {"type": "object"}

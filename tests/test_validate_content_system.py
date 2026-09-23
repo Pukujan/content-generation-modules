@@ -327,7 +327,8 @@ class ContentSystemValidationTests(unittest.TestCase):
             write_adapter(adapter, helper_version="0.4.1")
             brief_path = adapter / "project-brief.json"
             brief = json.loads(brief_path.read_text(encoding="utf-8"))
-            brief["must_preserve"] = ["The V0 does not include portable-pack export or import."]
+            brief["boundaries"] = ["The V0 does not include portable-pack export or import."]
+            brief["must_preserve"] = brief["boundaries"]
             brief_path.write_text(json.dumps(brief), encoding="utf-8")
             target = base / "project"
             target.mkdir()
@@ -342,6 +343,78 @@ class ContentSystemValidationTests(unittest.TestCase):
             readme_path.write_text("# Demo\n\nExport is planned.\n", encoding="utf-8")
             errors = check_adapter(adapter, target)
             self.assertTrue(any("must_preserve boundary is not stated" in error for error in errors), errors)
+
+    def test_041_requires_target_readme_to_repeat_every_declared_boundary(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            adapter = base / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter, helper_version="0.4.1")
+            brief_path = adapter / "project-brief.json"
+            brief = json.loads(brief_path.read_text(encoding="utf-8"))
+            brief["boundaries"] = [
+                "The V0 does not include portable-pack export or import.",
+                "The V0 does not include hosted collaboration.",
+            ]
+            brief["must_preserve"] = [brief["boundaries"][0]]
+            brief_path.write_text(json.dumps(brief), encoding="utf-8")
+            target = base / "project"
+            target.mkdir()
+            (target / "diagram.png").write_bytes(b"placeholder")
+            (target / "README.md").write_text(
+                "# Demo\n\nThe V0 does not include portable-pack export or import.\n",
+                encoding="utf-8",
+            )
+
+            errors = check_adapter(adapter, target)
+
+            self.assertTrue(any("declared boundary is not stated" in error for error in errors), errors)
+
+    def test_041_requires_boundary_text_to_be_verbatim(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            adapter = base / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter, helper_version="0.4.1")
+            brief_path = adapter / "project-brief.json"
+            brief = json.loads(brief_path.read_text(encoding="utf-8"))
+            brief["boundaries"] = ["The V0 does not include portable-pack export or import."]
+            brief["must_preserve"] = brief["boundaries"]
+            brief_path.write_text(json.dumps(brief), encoding="utf-8")
+            target = base / "project"
+            target.mkdir()
+            (target / "diagram.png").write_bytes(b"placeholder")
+            (target / "README.md").write_text(
+                "# Demo\n\nthe V0 does not include portable-pack export or import.\n",
+                encoding="utf-8",
+            )
+
+            errors = check_adapter(adapter, target)
+
+            self.assertTrue(any("boundary is not stated" in error for error in errors), errors)
+
+    def test_041_requires_must_preserve_entries_to_be_declared_boundaries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            adapter = base / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter, helper_version="0.4.1")
+            brief_path = adapter / "project-brief.json"
+            brief = json.loads(brief_path.read_text(encoding="utf-8"))
+            brief["boundaries"] = ["The V0 does not include portable-pack export or import."]
+            brief["must_preserve"] = ["The V0 does not include hosted collaboration."]
+            brief_path.write_text(json.dumps(brief), encoding="utf-8")
+            target = base / "project"
+            target.mkdir()
+            (target / "diagram.png").write_bytes(b"placeholder")
+            (target / "README.md").write_text(
+                "# Demo\n\nThe V0 does not include hosted collaboration.\n",
+                encoding="utf-8",
+            )
+
+            errors = check_adapter(adapter, target)
+
+            self.assertTrue(any("must_preserve entry is not a declared boundary" in error for error in errors), errors)
 
     def test_041_requires_at_least_one_protected_boundary(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -18,7 +18,7 @@ Repository evidence requires an owner/repository, full commit ID, repository-rel
 
 The validator checks the record structure and that requested citations appear in the target README. A human still checks whether the source is credible and actually supports the wording. A citation provides traceability, not proof of truth.
 
-For helper `0.4.1` and later, `project-brief.json` must include one to eight concise `must_preserve` sentences. Select evidence-backed exclusions or qualifications that could materially mislead readers if omitted, cite their sources near the sentence, and include each sentence verbatim in the README. The validator checks presence; independent review still checks whether the chosen boundaries are complete and whether prose or images imply excluded behavior.
+For helper `0.4.1` and later, `project-brief.json` must include an exhaustive `boundaries` inventory covering source-backed exclusions, explicit non-goals, not-implemented or deferred status, and owner or private-data limits. Every declared boundary must appear verbatim in the README. Add one to eight concise `must_preserve` sentences as exact members of that inventory, selecting exclusions or qualifications that could materially mislead readers if omitted. The validator checks string coverage and subset membership; independent factual review must still check whether source extraction missed a boundary and whether prose or images imply excluded behavior.
 
 ## Upgrade a target adapter
 
@@ -29,7 +29,7 @@ For helper `0.4.1` and later, `project-brief.json` must include one to eight con
 5. Add direct citations beside important README claims. Set `cite_in_readme` to `true` for evidence that must appear in the README; the validator checks that link.
 6. Revisit any claim whose source is missing, stale, private, or weaker than its wording. Qualify it or mark it `unknown`.
 7. Run the pinned helper's validator against the actual README and adapter, then complete the target's reader, evidence, image, and human review checks. Do not report completion on an `INVALID` result.
-8. For helper `0.4.1` and later, resolve conflicts between broad roadmap material and narrower current acceptance contracts, record the controlling source in the brief, and verify every `must_preserve` disclosure appears in the README.
+8. For helper `0.4.1` and later, resolve conflicts between broad roadmap material and narrower current acceptance contracts, record the controlling source in the brief, exhaustively inventory the boundaries, and verify every declared boundary appears in the README and every `must_preserve` entry matches one.
 
 The starter shape is in [`templates/project-brief.json`](../templates/project-brief.json); the machine-readable contract is [`schemas/project-brief.v2.schema.json`](../schemas/project-brief.v2.schema.json). See [`PROVENANCE_AND_CITATION.md`](PROVENANCE_AND_CITATION.md) for source-kind guidance and [`README_QUALITY_TDD.md`](README_QUALITY_TDD.md) for acceptance and metamorphic tests.
 
@@ -39,4 +39,4 @@ Do not replace the target's visual identity with CGM's default brand. Continue f
 
 ## Compatibility
 
-Targets pinned to `0.3.x` may keep project-brief v1 and their existing checks. A target that pins helper `0.4.0` or later must use project-brief v2. A target pinned to `0.4.1` or later must also provide `must_preserve` and repeat those boundaries in its README. Do not change a target adapter's version pin until its brief, README citations, boundary disclosures, and review are ready together.
+Targets pinned to `0.3.x` may keep project-brief v1 and their existing checks. A target that pins helper `0.4.0` or later must use project-brief v2. A target pinned to `0.4.1` or later must also provide `must_preserve`, declare its complete boundary inventory, and repeat every declared boundary in its README. Do not change a target adapter's version pin until its brief, README citations, boundary disclosures, and review are ready together.

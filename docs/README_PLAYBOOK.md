@@ -91,7 +91,7 @@ Before drafting, resolve conflicts between source documents about what is in sco
 
 For helper `0.4.x`, record what evidence `supports` and what it `limits`, its `source_revision`, and a timezone-aware `recorded_at` timestamp on each material evidence item. For a time-bound claim, record `valid_time` separately. Link important public claims near the sentence they support. Repository links should pin the inspected commit; external sources should link directly and record an access date when the page can change. A reference makes the claim traceable, not automatically true.
 
-For helper `0.4.1` and later, add one to eight short `must_preserve` sentences to the project brief. Use them for evidence-backed exclusions or qualifications that could materially mislead a reader if omitted. Copy each sentence verbatim into the README; the pinned validator checks that it appears. Keep each sentence concise and cite its evidence nearby.
+For helper `0.4.1` and later, build the `boundaries` inventory exhaustively from source-backed exclusions, explicit non-goals, not-implemented or deferred status, and owner or private-data limits. Every declared boundary must appear verbatim in the README. Then add one to eight short `must_preserve` sentences as a subset of that inventory; each entry must exactly match a declared boundary and should represent an especially risky exclusion or qualification. Keep each sentence concise and cite its evidence nearby. The pinned validator checks declared-string coverage and subset membership, but it cannot prove that source extraction itself was complete; independent factual review remains required.
 
 Model-assisted scores can help a person review a draft. They do not override deterministic checks, repository evidence, or human judgment.
 
@@ -106,7 +106,7 @@ Before opening a PR, ask:
 5. Can another person regenerate or reuse every committed image from the recorded prompt and guide?
 6. Can every strong claim be traced to evidence?
 7. Can a reviewer explain what the cited evidence supports and what it leaves unproven?
-8. Are all `must_preserve` boundaries stated verbatim, and do text and visuals avoid implying the excluded behavior?
+8. Are all declared boundaries stated verbatim, are `must_preserve` entries drawn from that inventory, and do text and visuals avoid implying the excluded behavior?
 9. Is the next action obvious?
 
 Run the deterministic validator after this human review against the actual generated adapter and README:

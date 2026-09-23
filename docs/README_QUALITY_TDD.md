@@ -72,7 +72,8 @@ Record task success, incorrect or missing answers, source-resolution success, an
 - No missing source, vague revision, invalid status, unsupported source type, or self-attestation as sole behavioral proof passes silently.
 - `0.3.x` adapters remain valid under their pinned contract; `0.4.x` requires project-brief v2.
 - A CGM change PR links an open issue with written acceptance/delivery criteria; CI validates this before it can satisfy branch protection.
-- For helper `0.4.1` and later, the brief contains one to eight evidence-backed `must_preserve` sentences and the target README repeats each sentence verbatim.
+- For helper `0.4.1` and later, the brief contains an exhaustive source-mapped boundary inventory, every declared boundary appears verbatim in the target README, and one to eight `must_preserve` sentences are exact members of that inventory.
+- The deterministic boundary gate checks declared-string coverage and `must_preserve` membership only; independent factual review must still assess whether source extraction missed exclusions, non-goals, not-implemented status, or owner/private-data limits.
 - Conflicting source scope is resolved before drafting: explicit non-goals and “not frozen” constraints are not overridden by a broad epic or a suggestive visual.
 - Existing image tests still require the declared narrative raster generation path, exact title/subtitle, prompt record, hash, and review evidence.
 - The target README itself is checked for linked, local narrative rasters; a source-map manifest cannot pass while the README omits those assets.

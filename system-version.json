@@ -68,10 +68,11 @@
   "boundary_disclosure_contract": {
     "version": "content-generation.must-preserve.v1",
     "field": "project-brief.v2.must_preserve",
+    "inventory_field": "project-brief.v2.boundaries",
     "minimum": 1,
     "maximum": 8,
     "required_for_helper_version": "0.4.1",
-    "readme_rule": "Each evidence-backed must_preserve sentence appears verbatim in the target README."
+    "readme_rule": "Every declared project-brief boundary appears verbatim in the target README; each evidence-backed must_preserve sentence is an exact member of that boundary inventory and also appears verbatim."
   },
   "scanability_contract": {
     "version": "content-generation.scanability.v1",

@@ -3,6 +3,8 @@
 ## 0.4.1 — draft
 
 - added `must_preserve` boundary disclosures to target briefs and a deterministic check that the generated README states each one verbatim;
+- require every declared project-brief boundary to appear verbatim in the target README and require each `must_preserve` entry to be an exact member of that inventory;
+- direct generation guidance to exhaustively extract exclusions, non-goals, not-implemented status, and owner/private-data limits, while keeping independent factual review for extraction completeness;
 - clarified source precedence when a broad roadmap conflicts with a narrower current acceptance contract, and required reviewing visuals for implied excluded behavior;
 - tightened target-adapter provenance, raster-link, manifest-role, helper-pin, and generated-asset checks based on independent fresh-session failures;
 - added a BDD-style reader behavior contract, research-backed distinctions between regression, metamorphic, differential, and holdout evaluation, and executable acceptance criteria;

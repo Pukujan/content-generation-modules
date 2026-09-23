@@ -498,6 +498,8 @@ def check(root: Path) -> list[str]:
             errors.append("system-version.json must declare content-generation.must-preserve.v1 from 0.4.1")
         if boundary_contract.get("field") != "project-brief.v2.must_preserve":
             errors.append("system-version.json boundary_disclosure_contract must name project-brief.v2.must_preserve")
+        if boundary_contract.get("inventory_field") != "project-brief.v2.boundaries":
+            errors.append("system-version.json boundary_disclosure_contract must name project-brief.v2.boundaries as its inventory")
         if boundary_contract.get("minimum") != 1 or boundary_contract.get("maximum") != 8:
             errors.append("system-version.json boundary_disclosure_contract must require one to eight disclosures")
         if boundary_contract.get("required_for_helper_version") != "0.4.1":
@@ -620,27 +622,51 @@ def check_adapter(
         errors.extend(check_project_brief_v2(project, readme_text))
 
     if helper_version >= (0, 4, 1):
+        boundaries = project.get("boundaries")
+        if not isinstance(boundaries, list) or not boundaries:
+            errors.append(
+                "project-brief.json boundaries must contain at least one declared boundary for helper versions 0.4.1 and later"
+            )
+            declared_boundaries: list[str] = []
+        else:
+            declared_boundaries = [
+                boundary for boundary in boundaries if isinstance(boundary, str) and boundary.strip()
+            ]
+            if len(declared_boundaries) != len(boundaries):
+                errors.append("project-brief.json boundaries entries must be non-empty strings")
+
         must_preserve = project.get("must_preserve")
         if not isinstance(must_preserve, list) or not must_preserve:
             errors.append(
                 "project-brief.json must_preserve must contain at least one evidence-backed boundary for helper versions 0.4.1 and later"
             )
+            disclosures: list[str] = []
         else:
             disclosures = [value for value in must_preserve if isinstance(value, str) and value.strip()]
             if len(disclosures) != len(must_preserve):
                 errors.append("project-brief.json must_preserve entries must be non-empty strings")
             if len(disclosures) > 8:
                 errors.append("project-brief.json must_preserve must contain no more than eight boundaries")
-            target_readme = project_root / "README.md" if project_root else None
-            if target_readme is None or not target_readme.is_file():
-                errors.append("must_preserve validation requires the target README")
-            else:
-                target_text = target_readme.read_text(encoding="utf-8").casefold()
-                for disclosure in disclosures:
-                    if disclosure.casefold() not in target_text:
-                        errors.append(
-                            f"must_preserve boundary is not stated in the target README: {disclosure}"
-                        )
+        target_readme = project_root / "README.md" if project_root else None
+        if target_readme is None or not target_readme.is_file():
+            errors.append("must_preserve validation requires the target README")
+        else:
+            target_text = target_readme.read_text(encoding="utf-8")
+            for boundary in declared_boundaries:
+                if boundary not in target_text:
+                    errors.append(
+                        f"declared boundary is not stated in the target README: {boundary}"
+                    )
+            for disclosure in disclosures:
+                if disclosure not in target_text:
+                    errors.append(
+                        f"must_preserve boundary is not stated in the target README: {disclosure}"
+                    )
+        for disclosure in disclosures:
+            if disclosure not in declared_boundaries:
+                errors.append(
+                    f"must_preserve entry is not a declared boundary: {disclosure}"
+                )
 
     brand = values.get("brand-language.json", {})
     for field in ("name", "personality", "promise", "avoid"):
