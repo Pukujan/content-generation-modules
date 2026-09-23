@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.1 — draft
+
+- added `must_preserve` boundary disclosures to target briefs and a deterministic check that the generated README states each one verbatim;
+- clarified source precedence when a broad roadmap conflicts with a narrower current acceptance contract, and required reviewing visuals for implied excluded behavior;
+- tightened target-adapter provenance, raster-link, manifest-role, helper-pin, and generated-asset checks based on independent fresh-session failures;
+- added a BDD-style reader behavior contract, research-backed distinctions between regression, metamorphic, differential, and holdout evaluation, and executable acceptance criteria;
+- kept the existing image-generation guidance, brand direction, and narrative image requirements unchanged.
+
 ## 0.3.1 — draft
 
 - added a deterministic `0.3.x` narrative-image gate that rejects SVG substitutions, missing built-in image-generation provenance, missing exact title/subtitle records, missing prompt records, and stale file hashes;

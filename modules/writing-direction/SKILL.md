@@ -74,4 +74,19 @@ Ask what a first-time reader can repeat after twenty seconds. If the answer is o
 
 For helper `0.4.x`, also ask: does each material claim explain what its cited source supports, what remains unproven, which exact revision was inspected, and when this evidence record was recorded? Keep valid-time bounds separate for claims that only apply during a known period. Put direct citations beside important public claims. A citation provides traceability, not a truth guarantee.
 
+When a target brief contains `must_preserve` boundaries, include every sentence verbatim in the README and keep it beside the related citation. Review the rendered images against the same boundaries: captions, labels, portable objects, and interface cues can imply capabilities the prose carefully excludes. Do not turn a roadmap or epic into current scope when a narrower acceptance contract excludes or defers that behavior.
+
 Also ask: can the reader find why the project exists, see one visual idea, understand how that visual was generated and should be used, find prior reviewed examples, and reach a useful next action without reading the technical appendix?
+
+## Deterministic delivery gate
+
+Before calling the README package complete, run the validator from the pinned helper checkout against the actual output adapter and README:
+
+```bash
+python path/to/content-generation-modules/scripts/validate_content_system.py \
+  --root path/to/content-generation-modules \
+  --adapter path/to/target/.content-system \
+  --project-root path/to/target
+```
+
+Use the real paths for the task workspace. Fix every `INVALID` result and rerun the same command. In the handoff, report the command and its exact `VALID` result; never infer success from generated files or from a validator run against a different directory.

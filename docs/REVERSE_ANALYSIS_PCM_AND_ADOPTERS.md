@@ -53,9 +53,17 @@ This adds source resolution and bounded explanations to CGM's current human-faci
 
 ## Acceptance and limitations
 
-The PDD, SDD, and TDD define reader jobs, the story spine, evidence records, deterministic gates, metamorphic checks, and an independent holdout protocol. The automated suite currently checks bounded v2 evidence, immutable repository citations, adapter compatibility, evidence-order invariance, and the existing image rules. **The sealed hidden holdout has not been run.** The reference repositories were development evidence, so they cannot also count as unseen test targets.
+The PDD, SDD, and TDD define reader jobs, the story spine, evidence records, deterministic gates, metamorphic checks, and an independent holdout protocol. The automated suite checks bounded v2 evidence, immutable repository citations, adapter compatibility, evidence-order invariance, and the existing image rules.
 
-The README comparisons are affected by topic, author, length, examples, and other edits. Pukujan's review motivates the work but is not a reader study. The hypothesis that this contract improves understanding and claim traceability needs blinded reader tasks and fresh, unseen target repositories. Until those runs exist, CGM claims only that the structure is specified and its visible deterministic checks pass.
+## Fresh-session transfer evidence
+
+On 2026-09-23, six independent GPT-5.6-Luna sessions generated README/image packages from the same pinned target evidence: three using helper `0.3.1` and three using `0.4.0`. They had no prior conversation context or access to the sealed answer key. A separate evaluator scored neutral aliases against a private fact map and PCM's structure-only rubric. The public report intentionally omits the target identity and evaluator key.
+
+All six final packages passed their pinned mechanical validator, exact source-pin checks, local raster-link checks, and manifest-hash checks. Human/evidence acceptance was much weaker: **1/3 `0.4.0` packages passed every hard gate, compared with 0/3 `0.3.1` packages**. The strongest `0.4.0` package scored 4.7/5 and PCM 18/18 for structure, showing that the desired explanation is achievable. Other `0.4.0` packages still made portability/export sound available in V0 or implied it in the supporting image. Baseline packages had incomplete per-claim provenance or the wrong helper pin. This is a positive example, not repeatability evidence; `0.4.0` does not meet the release gate.
+
+The main follow-up is the `0.4.1` protected-boundary contract: a target brief names its high-risk, evidence-backed scope exclusions and the validator requires each sentence to appear verbatim in the README. The writing guidance also resolves broad roadmap language against narrower current acceptance contracts and checks images for implied excluded capabilities. These changes still need a new fresh-session holdout before release.
+
+The holdout target was public, so the test establishes transfer to clean agent sessions with a sealed answer key; it cannot establish that the model had never seen the public facts during training. The private key, target identity, and package-level scores remain outside this public repository. The reference repositories remain development evidence, not holdouts.
 
 ## Inspected revisions
 

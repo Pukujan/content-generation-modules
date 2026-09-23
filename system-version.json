@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -12,6 +12,7 @@
     "html-demo"
   ],
   "canonical_files": [
+    "system-version.json",
     "project-brief.json",
     "brand-language.json",
     "visual-style.json",
@@ -19,8 +20,10 @@
     "review-rubric.json"
   ],
   "helper_contract_files": [
+    "templates/system-version.json",
     "templates/readme-contract.json",
     "templates/project-brief.json",
+    "schemas/adapter-system-version.schema.json",
     "schemas/readme-contract.schema.json",
     "schemas/project-brief.v2.schema.json",
     "docs/CONTENT_RESEARCH.md",
@@ -61,6 +64,14 @@
     "temporal_model": "recorded_at is transaction time; valid_time describes when a time-bound claim applies",
     "truth_boundary": "citation establishes traceability, not truth",
     "required_for_helper_version": "0.4.0"
+  },
+  "boundary_disclosure_contract": {
+    "version": "content-generation.must-preserve.v1",
+    "field": "project-brief.v2.must_preserve",
+    "minimum": 1,
+    "maximum": 8,
+    "required_for_helper_version": "0.4.1",
+    "readme_rule": "Each evidence-backed must_preserve sentence appears verbatim in the target README."
   },
   "scanability_contract": {
     "version": "content-generation.scanability.v1",

@@ -281,7 +281,28 @@ def check_narrative_assets(
 
     for asset in manifest.get("assets", []):
         role = str(asset.get("role", "")).lower()
-        if not any(role == marker or role.startswith(f"{marker} ") for marker in role_markers):
+        is_narrative_role = any(
+            role == marker or role.startswith(f"{marker} ") for marker in role_markers
+        )
+        usage = str(asset.get("usage", "")).lower()
+        narrative_usage = any(
+            marker in usage
+            for marker in (
+                "readme hero",
+                "readme problem",
+                "readme supporting",
+                "readme narrative",
+                "hero image",
+                "supporting image",
+                "problem image",
+                "story image",
+            )
+        )
+        if narrative_usage and not is_narrative_role:
+            errors.append(
+                f"narrative asset usage declares a narrative role but its manifest role is not narrative: {asset.get('path', '<unknown>')}"
+            )
+        if not is_narrative_role:
             continue
 
         for field in REQUIRED_NARRATIVE_ASSET_FIELDS:
@@ -307,7 +328,9 @@ def check_narrative_assets(
 
         if project_root:
             image_path = project_root / asset_path
-            prompt_record = project_root / str(asset.get("prompt_record", ""))
+            prompt_record_reference = str(asset.get("prompt_record", ""))
+            prompt_record_path = prompt_record_reference.split("#", 1)[0].split("?", 1)[0]
+            prompt_record = project_root / prompt_record_path
             if not prompt_record.is_file():
                 errors.append(f"narrative asset prompt record does not exist: {asset.get('prompt_record')}")
             if image_path.is_file() and re.fullmatch(r"[0-9a-fA-F]{64}", digest):
@@ -318,9 +341,19 @@ def check_narrative_assets(
     return errors
 
 
-def check_readme(root: Path) -> list[str]:
+def check_readme(
+    root: Path,
+    content_root: Path | None = None,
+    *,
+    visual: dict | None = None,
+    manifest: dict | None = None,
+    include_required_references: bool = True,
+    check_guides: bool = True,
+    enforce_sections: bool = True,
+) -> list[str]:
     errors: list[str] = []
-    readme_path = root / "README.md"
+    readme_root = content_root or root
+    readme_path = readme_root / "README.md"
     if not readme_path.is_file():
         return ["missing README.md"]
 
@@ -330,10 +363,11 @@ def check_readme(root: Path) -> list[str]:
         return [str(exc)]
 
     text = readme_path.read_text(encoding="utf-8")
-    for section in contract.get("required_sections", []):
-        heading = section.get("heading")
-        if heading and f"## {heading}" not in text:
-            errors.append(f"README missing required section: {heading}")
+    if enforce_sections:
+        for section in contract.get("required_sections", []):
+            heading = section.get("heading")
+            if heading and f"## {heading}" not in text:
+                errors.append(f"README missing required section: {heading}")
 
     story_heading = "## Why this exists"
     mechanism_heading = "## How it works"
@@ -347,9 +381,10 @@ def check_readme(root: Path) -> list[str]:
     if first_code_block != -1 and story_position != -1 and first_code_block < story_position:
         errors.append("README must place technical code after the human situation")
 
-    for reference in contract.get("required_references", []):
-        if reference not in text:
-            errors.append(f"README missing required reference: {reference}")
+    if include_required_references:
+        for reference in contract.get("required_references", []):
+            if reference not in text:
+                errors.append(f"README missing required reference: {reference}")
 
     expected_claim_fields = ["claim", "source", "status", "supports", "limits", "source_revision", "recorded_at"]
     if contract.get("schema_version") != "content-generation.readme-contract.v2":
@@ -371,20 +406,50 @@ def check_readme(root: Path) -> list[str]:
     image_refs = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", text)
     image_refs.extend(re.findall(r"<img[^>]+src=[\"']([^\"']+)[\"']", text, flags=re.IGNORECASE))
     local_image_refs = [ref for ref in image_refs if not ref.startswith(("http://", "https://", "#"))]
+    referenced_image_paths = {
+        ref.split("#", 1)[0].split("?", 1)[0].strip("<>").replace("\\", "/")
+        for ref in local_image_refs
+    }
     minimum_images = int(visual_policy.get("minimum_narrative_images_for_this_helper", 0))
-    if len(local_image_refs) < minimum_images:
+    raster_image_paths = {
+        path for path in referenced_image_paths
+        if Path(path).suffix.lower() in NARRATIVE_RASTER_SUFFIXES
+    }
+    if len(raster_image_paths) < minimum_images:
         errors.append(
             "README must reference at least "
-            f"{minimum_images} local narrative image(s); found {len(local_image_refs)}"
+            f"{minimum_images} local raster narrative image(s); found {len(raster_image_paths)}"
         )
     for reference in local_image_refs:
-        image_path = reference.split("#", 1)[0].strip("<>")
-        if not (root / image_path).is_file():
+        image_path = reference.split("#", 1)[0].split("?", 1)[0].strip("<>")
+        if not (readme_root / image_path).is_file():
             errors.append(f"README image does not exist: {image_path}")
 
-    for guide in visual_policy.get("required_guides", []):
-        if not (root / guide).is_file():
-            errors.append(f"missing required image guide or record: {guide}")
+    if visual is not None and manifest is not None:
+        narrative_roles = visual.get("narrative_roles", [])
+        narrative_paths = {
+            str(asset.get("path", "")).replace("\\", "/")
+            for asset in manifest.get("assets", [])
+            if any(
+                str(asset.get("role", "")).lower() == str(marker).lower()
+                or str(asset.get("role", "")).lower().startswith(f"{str(marker).lower()} ")
+                for marker in narrative_roles
+            )
+        }
+        linked_narrative_rasters = {
+            path for path in referenced_image_paths
+            if path in narrative_paths and Path(path).suffix.lower() in NARRATIVE_RASTER_SUFFIXES
+        }
+        if len(linked_narrative_rasters) < minimum_images:
+            errors.append(
+                "README must link at least "
+                f"{minimum_images} raster assets declared with narrative roles; found {len(linked_narrative_rasters)}"
+            )
+
+    if check_guides:
+        for guide in visual_policy.get("required_guides", []):
+            if not (readme_root / guide).is_file():
+                errors.append(f"missing required image guide or record: {guide}")
 
     return errors
 
@@ -427,6 +492,18 @@ def check(root: Path) -> list[str]:
         errors.append("system-version.json claim_explanation_contract must be required from 0.4.0")
     if claim_contract.get("optional_fields") != ["valid_time"] or not claim_contract.get("temporal_model"):
         errors.append("system-version.json claim_explanation_contract must define the valid-time model")
+    boundary_contract = version.get("boundary_disclosure_contract", {})
+    if _version_tuple(version.get("version")) >= (0, 4, 1):
+        if boundary_contract.get("version") != "content-generation.must-preserve.v1":
+            errors.append("system-version.json must declare content-generation.must-preserve.v1 from 0.4.1")
+        if boundary_contract.get("field") != "project-brief.v2.must_preserve":
+            errors.append("system-version.json boundary_disclosure_contract must name project-brief.v2.must_preserve")
+        if boundary_contract.get("minimum") != 1 or boundary_contract.get("maximum") != 8:
+            errors.append("system-version.json boundary_disclosure_contract must require one to eight disclosures")
+        if boundary_contract.get("required_for_helper_version") != "0.4.1":
+            errors.append("system-version.json boundary disclosure must be required from 0.4.1")
+        if not boundary_contract.get("readme_rule"):
+            errors.append("system-version.json boundary_disclosure_contract must define its README rule")
     scanability = version.get("scanability_contract", {})
     if scanability.get("version") != "content-generation.scanability.v1":
         errors.append("system-version.json must declare content-generation.scanability.v1")
@@ -441,6 +518,7 @@ def check(root: Path) -> list[str]:
             errors.append(f"module entry point is over 500 lines: {path.relative_to(root)}")
 
     required_schemas = {
+        "adapter-system-version.schema.json",
         "project-brief.schema.json",
         "project-brief.v2.schema.json",
         "asset-manifest.schema.json",
@@ -462,6 +540,7 @@ def check(root: Path) -> list[str]:
             errors.append(f"missing versioned helper contract file: {relative_path}")
 
     for name in (
+        "system-version.json",
         "project-brief.json",
         "brand-language.json",
         "visual-style.json",
@@ -481,7 +560,12 @@ def check(root: Path) -> list[str]:
     return errors
 
 
-def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
+def check_adapter(
+    adapter: Path,
+    project_root: Path | None = None,
+    *,
+    helper_root: Path | None = None,
+) -> list[str]:
     errors: list[str] = []
     required = {
         "system-version.json": "content-generation.adapter.v1",
@@ -505,6 +589,12 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
     for field in ("helper_repository", "helper_version", "helper_commit"):
         if not system.get(field):
             errors.append(f"adapter system-version.json missing {field}")
+    if system.get("helper_repository") and not _valid_web_uri(system["helper_repository"]):
+        errors.append("adapter system-version.json helper_repository must be a direct HTTP(S) URL")
+    if system.get("helper_version") and not re.fullmatch(r"\d+\.\d+\.\d+", str(system["helper_version"])):
+        errors.append("adapter system-version.json helper_version must use semantic-version form")
+    if system.get("helper_commit") and not re.fullmatch(r"(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})", str(system["helper_commit"])):
+        errors.append("adapter system-version.json helper_commit must be a full commit ID")
     if not system.get("modules") or set(system["modules"]) != EXPECTED_MODULES:
         errors.append("adapter system-version.json modules do not match the helper contract")
 
@@ -529,6 +619,29 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
             readme_text = (project_root / "README.md").read_text(encoding="utf-8")
         errors.extend(check_project_brief_v2(project, readme_text))
 
+    if helper_version >= (0, 4, 1):
+        must_preserve = project.get("must_preserve")
+        if not isinstance(must_preserve, list) or not must_preserve:
+            errors.append(
+                "project-brief.json must_preserve must contain at least one evidence-backed boundary for helper versions 0.4.1 and later"
+            )
+        else:
+            disclosures = [value for value in must_preserve if isinstance(value, str) and value.strip()]
+            if len(disclosures) != len(must_preserve):
+                errors.append("project-brief.json must_preserve entries must be non-empty strings")
+            if len(disclosures) > 8:
+                errors.append("project-brief.json must_preserve must contain no more than eight boundaries")
+            target_readme = project_root / "README.md" if project_root else None
+            if target_readme is None or not target_readme.is_file():
+                errors.append("must_preserve validation requires the target README")
+            else:
+                target_text = target_readme.read_text(encoding="utf-8").casefold()
+                for disclosure in disclosures:
+                    if disclosure.casefold() not in target_text:
+                        errors.append(
+                            f"must_preserve boundary is not stated in the target README: {disclosure}"
+                        )
+
     brand = values.get("brand-language.json", {})
     for field in ("name", "personality", "promise", "avoid"):
         if not brand.get(field):
@@ -550,6 +663,18 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
                 errors.append(f"asset does not exist under project root: {asset_path}")
     if helper_version >= (0, 3, 0):
         errors.extend(check_narrative_assets(visual, manifest, project_root))
+    if project_root and helper_root and (project_root / "README.md").is_file():
+        errors.extend(
+            check_readme(
+                helper_root,
+                project_root,
+                visual=visual,
+                manifest=manifest,
+                include_required_references=False,
+                check_guides=False,
+                enforce_sections=False,
+            )
+        )
     return errors
 
 
@@ -561,7 +686,13 @@ def main() -> int:
     args = parser.parse_args()
     errors = check(args.root.resolve())
     if args.adapter:
-        errors.extend(check_adapter(args.adapter.resolve(), args.project_root.resolve() if args.project_root else None))
+        errors.extend(
+            check_adapter(
+                args.adapter.resolve(),
+                args.project_root.resolve() if args.project_root else None,
+                helper_root=args.root.resolve(),
+            )
+        )
     if errors:
         print("INVALID")
         for error in errors:

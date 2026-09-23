@@ -1,10 +1,17 @@
 import hashlib
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.validate_content_system import check, check_adapter, check_project_brief_v2, check_readme
+from scripts.validate_content_system import (
+    check,
+    check_adapter,
+    check_narrative_assets,
+    check_project_brief_v2,
+    check_readme,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,7 +43,7 @@ def sample_evidence(**overrides):
     return item
 
 
-def write_adapter(adapter: Path, brief_version="v2"):
+def write_adapter(adapter: Path, brief_version="v2", helper_version="0.4.0"):
     project_schema = f"content-generation.project-brief.{brief_version}"
     evidence = sample_evidence()
     if brief_version == "v1":
@@ -45,7 +52,7 @@ def write_adapter(adapter: Path, brief_version="v2"):
         "system-version.json": {
             "schema_version": "content-generation.adapter.v1",
             "helper_repository": "https://github.com/Pukujan/content-generation-modules",
-            "helper_version": "0.4.0",
+            "helper_version": helper_version,
             "helper_commit": COMMIT,
             "modules": MODULES,
         },
@@ -60,7 +67,7 @@ def write_adapter(adapter: Path, brief_version="v2"):
         },
         "brand-language.json": {"schema_version": "content-generation.brand-language.v1", "name": "Demo", "personality": ["clear"], "promise": "A useful promise", "avoid": ["hype"]},
         "visual-style.json": {"schema_version": "content-generation.visual-style.v1", "reference_asset": "hero.png", "generation_workflow": "built-in image_gen", "narrative_roles": ["hero", "problem", "supporting"], "palette": {"background": "#000"}, "roles": {"hero": {}}, "reject_when": ["busy"]},
-        "asset-manifest.json": {"schema_version": "content-generation.asset-manifest.v1", "system_version": "0.4.0", "assets": [{"path": "diagram.png", "role": "diagram"}]},
+        "asset-manifest.json": {"schema_version": "content-generation.asset-manifest.v1", "system_version": helper_version, "assets": [{"path": "diagram.png", "role": "diagram"}]},
         "review-rubric.json": {"schema_version": "content-generation.review-rubric.v1", "dimensions": [{"id": "clarity", "question": "clear?"}], "decision_rule": "human review"},
     }
     for name, value in files.items():
@@ -70,6 +77,21 @@ def write_adapter(adapter: Path, brief_version="v2"):
 class ContentSystemValidationTests(unittest.TestCase):
     def test_repository_contract_is_valid(self):
         self.assertEqual(check(ROOT), [])
+
+    def test_repository_contract_requires_041_boundary_policy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "helper"
+            shutil.copytree(
+                ROOT,
+                target,
+                ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"),
+            )
+            version_path = target / "system-version.json"
+            version = json.loads(version_path.read_text(encoding="utf-8"))
+            del version["boundary_disclosure_contract"]
+            version_path.write_text(json.dumps(version), encoding="utf-8")
+            errors = check(target)
+            self.assertTrue(any("must declare content-generation.must-preserve.v1" in error for error in errors), errors)
 
     def test_readme_gate_rejects_a_technical_only_readme(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -81,7 +103,7 @@ class ContentSystemValidationTests(unittest.TestCase):
             (target / "README.md").write_text("# Internal API\n\n## Setup\n", encoding="utf-8")
             errors = check_readme(target)
             self.assertTrue(any("README missing required section" in error for error in errors))
-            self.assertTrue(any("local narrative image" in error for error in errors))
+            self.assertTrue(any("local raster narrative image" in error for error in errors))
 
     def test_readme_gate_rejects_technical_details_before_the_human_story(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -129,7 +151,7 @@ class ContentSystemValidationTests(unittest.TestCase):
                     "schema_version": "content-generation.adapter.v1",
                     "helper_repository": "https://example.invalid/helper",
                     "helper_version": "0.1.1",
-                    "helper_commit": "abc123",
+                    "helper_commit": COMMIT,
                     "modules": sorted({"brand-foundation", "content-context", "writing-direction", "visual-direction", "image-generation", "html-demo"}),
                 },
                 "project-brief.json": {"schema_version": "content-generation.project-brief.v1", "project": "Demo", "audience": ["people"], "problem": "problem", "solution": "solution", "evidence": [{"claim": "claim", "source": "README.md"}], "boundaries": ["boundary"]},
@@ -171,6 +193,74 @@ class ContentSystemValidationTests(unittest.TestCase):
             (project_root / "IMAGE_NOTES.md").write_text("prompt record", encoding="utf-8")
             errors = check_adapter(adapter, project_root)
             self.assertTrue(any("must be a raster image" in error for error in errors))
+
+    def test_prompt_record_accepts_a_markdown_anchor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "assets").mkdir()
+            image = project / "assets" / "hero.png"
+            image.write_bytes(b"image bytes")
+            (project / "assets" / "IMAGE_NOTES.md").write_text("# Hero\nPrompt record", encoding="utf-8")
+            asset = {
+                "path": "assets/hero.png",
+                "role": "hero",
+                "orientation": "wide",
+                "dimensions": "1600x900",
+                "text_policy": "exact copy",
+                "prompt_recipe": "Title / Subtitle",
+                "exact_title": "Title",
+                "exact_subtitle": "Subtitle",
+                "alt_text": "A clear story",
+                "usage": "README hero",
+                "crop_behavior": "center-safe",
+                "rejection_conditions": ["garbled copy"],
+                "review_decision": "accepted",
+                "provider": "built-in image_gen",
+                "prompt_record": "assets/IMAGE_NOTES.md#hero",
+                "hash": hashlib.sha256(image.read_bytes()).hexdigest(),
+            }
+            visual = {"generation_workflow": "built-in image_gen", "narrative_roles": ["hero"]}
+            self.assertEqual(check_narrative_assets(visual, {"assets": [asset]}, project), [])
+
+    def test_non_narrative_role_cannot_claim_readme_hero_usage(self):
+        asset = {
+            "path": "assets/flow.svg",
+            "role": "diagram",
+            "usage": "README hero and How it works supporting visual",
+        }
+        visual = {"generation_workflow": "built-in image_gen", "narrative_roles": ["hero", "supporting"]}
+        errors = check_narrative_assets(visual, {"assets": [asset]})
+        self.assertTrue(any("usage declares a narrative role" in error for error in errors), errors)
+
+    def test_readme_minimum_counts_only_raster_images(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            (target / "templates").mkdir()
+            (target / "templates" / "readme-contract.json").write_bytes(
+                (ROOT / "templates" / "readme-contract.json").read_bytes()
+            )
+            (target / "assets").mkdir()
+            (target / "assets" / "one.svg").write_text("<svg/>", encoding="utf-8")
+            (target / "assets" / "two.svg").write_text("<svg/>", encoding="utf-8")
+            (target / "README.md").write_text(
+                "# Project\n\n**A useful story.**\n\n"
+                "![One](assets/one.svg)\n\n![Two](assets/two.svg)\n",
+                encoding="utf-8",
+            )
+            errors = check_readme(target)
+            self.assertTrue(any("raster narrative image" in error for error in errors), errors)
+
+    def test_adapter_validation_checks_target_readme_assets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            adapter = base / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter, "v2")
+            target = base / "project"
+            target.mkdir()
+            (target / "README.md").write_text("# Internal API\n\n## Setup\n", encoding="utf-8")
+            errors = check_adapter(adapter, target, helper_root=ROOT)
+            self.assertTrue(any("raster narrative image" in error for error in errors), errors)
 
     def test_v2_claim_record_requires_bounded_revision_pinned_evidence(self):
         evidence = sample_evidence()
@@ -216,6 +306,55 @@ class ContentSystemValidationTests(unittest.TestCase):
             write_adapter(adapter, "v1")
             errors = check_adapter(adapter)
             self.assertTrue(any("require project-brief.v2" in error for error in errors), errors)
+
+    def test_adapter_requires_a_full_pinned_helper_commit(self):
+        with tempfile.TemporaryDirectory() as directory:
+            adapter = Path(directory) / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter, "v2")
+            system_path = adapter / "system-version.json"
+            system = json.loads(system_path.read_text(encoding="utf-8"))
+            system["helper_commit"] = "abc123"
+            system_path.write_text(json.dumps(system), encoding="utf-8")
+            errors = check_adapter(adapter)
+            self.assertTrue(any("helper_commit must be a full commit ID" in error for error in errors), errors)
+
+    def test_041_requires_target_readme_to_repeat_protected_boundaries(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            adapter = base / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter, helper_version="0.4.1")
+            brief_path = adapter / "project-brief.json"
+            brief = json.loads(brief_path.read_text(encoding="utf-8"))
+            brief["must_preserve"] = ["The V0 does not include portable-pack export or import."]
+            brief_path.write_text(json.dumps(brief), encoding="utf-8")
+            target = base / "project"
+            target.mkdir()
+            (target / "diagram.png").write_bytes(b"placeholder")
+            readme_path = target / "README.md"
+            readme_path.write_text(
+                "# Demo\n\nThe V0 does not include portable-pack export or import.\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(check_adapter(adapter, target), [])
+
+            readme_path.write_text("# Demo\n\nExport is planned.\n", encoding="utf-8")
+            errors = check_adapter(adapter, target)
+            self.assertTrue(any("must_preserve boundary is not stated" in error for error in errors), errors)
+
+    def test_041_requires_at_least_one_protected_boundary(self):
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory)
+            adapter = base / ".content-system"
+            adapter.mkdir()
+            write_adapter(adapter, helper_version="0.4.1")
+            target = base / "project"
+            target.mkdir()
+            (target / "diagram.png").write_bytes(b"placeholder")
+            (target / "README.md").write_text("# Demo\n", encoding="utf-8")
+            errors = check_adapter(adapter, target)
+            self.assertTrue(any("must_preserve must contain at least one" in error for error in errors), errors)
 
 
 if __name__ == "__main__":

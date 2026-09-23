@@ -2,12 +2,15 @@
 
 The public validator proves that a target adapter contains the expected files and records. It cannot prove that an agent will make the same judgment on a repository it has never seen. That question needs a holdout: an unseen target, an unseen failure pattern, and an evaluation record that the agent cannot optimize against by reading the fixture.
 
+The black-box exercise is a **fresh-session README transfer holdout**. When both a prior and candidate CGM version receive the same target and task, the paired comparison is also differential testing. When a controlled input change is used to check a required relationship between outputs, that is metamorphic testing. Keep these labels separate: the first tells us transfer, the second compares versions, and the third checks an invariant under a transformation.
+
 ## What the holdout should measure
 
 Run the same content-generation task against target repositories that are excluded from the public examples. The task should ask for a story-first README and its narrative visuals using the target adapter. The evaluator should score two layers:
 
 - **Contract layer:** the README leads with the human situation; headings and bold anchors pass the scan test; narrative assets are PNG, JPEG, or WebP; each has exact title and subtitle fields, a prompt record, provider provenance, a review decision, and a matching SHA-256 hash; the README does not substitute hand-authored SVGs for requested narrative images.
 - **Evidence layer:** every material claim has a status, a plain-language statement of what its evidence supports and leaves unproven, a timezone-aware record timestamp, and a resolvable source revision and locator. Time-bound claims record when they apply separately from when the record was entered. Repository citations pin a full commit; external sources link directly and record access dates. Removing a claim's only source must weaken, remove, or mark that claim unknown.
+- **Protected-boundary layer:** for helper `0.4.1` and later, the target brief includes one to eight evidence-backed `must_preserve` sentences and the README states each one verbatim. The evaluator also checks whether image content implies an excluded capability.
 - **Quality layer:** an independent reviewer or vision-capable evaluator checks that the image explains the target repository, keeps the required visual identity, uses readable copy, survives wide and narrow crops, and avoids generic cyberpunk, dashboard, route-signal, or decorative imagery that does not answer the reader’s question.
 
 The contract layer is deterministic. The quality layer must remain independent because a file can satisfy metadata checks while still being the wrong visual.
@@ -38,6 +41,10 @@ repeatability      = fixtures passing both rates on every run / total fixtures
 
 Treat a single successful run as evidence of possibility, not repeatability. A release candidate should have zero contract failures and no repeated quality failure on the same fixture. Any failure should be classified before changing the helper: wrong source contract, wrong asset type, missing provenance, unreadable copy, visual mismatch, crop failure, or unsupported claim.
 
+For differential evaluation, freeze the target revision, model family, user-facing task, image request, and evaluator rubric before generating either version. Assign neutral aliases, score each output independently, and unblind version labels only after scores and hard-gate evidence are recorded. Report paired differences and disagreements; do not treat three runs on one fixture as evidence of broad repository coverage.
+
+For metamorphic evaluation, change one declared input condition at a time and generate a new output in a clean session. Record the exact transformation and expected relation before looking at that output. Compare claim meaning, status, source lineage, story, and image direction against the relation. Merely reasoning about what an existing output ought to do is an oracle review, not an executed metamorphic test; record it as `not_run` until the transformed input is run through CGM.
+
 ## Suggested private evaluator flow
 
 ```text
@@ -55,6 +62,12 @@ failure-class report and release decision
 ```
 
 The public helper provides the structural gate used by that flow. For `0.3.x` adapters it rejects narrative SVGs, missing built-in image-generation provenance, missing exact title or subtitle records, missing prompt records, and hashes that do not match the committed image. For `0.4.x` adapters it also requires project-brief v2, bounded claim explanations, and revision-pinned source records. It does not claim to replace human review of taste, clarity, evidence quality, or brand fit.
+
+## First blinded transfer batch
+
+A six-run batch completed on 2026-09-23 using three fresh GPT-5.6-Luna sessions per helper revision and one independent blind evaluator. The private target identity, answer key, and per-package report remain outside this repository. All six packages passed their pinned deterministic validator, exact source-pin checks, two local raster-link checks, and manifest SHA-256 checks. The blind human/evidence rubric passed **1/3 helper `0.4.0` packages and 0/3 helper `0.3.1` packages**. The best `0.4.0` sample scored 4.7/5 and 18/18 on PCM's structure-only rubric, while two other `0.4.0` outputs made V0 portability/export sound supported. The result shows possibility, not repeatability; `0.4.0` fails the release gate.
+
+The next candidate adds evidence-backed `must_preserve` boundaries and a deterministic README disclosure check. Keep the exact private fixture and scoring key unavailable to generation agents. A public target permits the model to have seen its facts in pretraining, so do not describe this as proof of training-data novelty.
 
 ## What this catches from the previous failure
 

@@ -22,6 +22,9 @@
     }
   ],
   "boundaries": [],
+  "must_preserve": [
+    "Replace this with one concise, evidence-backed boundary sentence that must appear verbatim in the README."
+  ],
   "terminology": {
     "preferred": {},
     "avoid": []

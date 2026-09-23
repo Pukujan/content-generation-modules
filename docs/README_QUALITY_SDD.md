@@ -1,16 +1,17 @@
 # System design: story spine and evidence lineage
 
-Status: contract proposal for Content Generation Modules `0.4.0`.
+Status: contract proposal for Content Generation Modules `0.4.1`.
 
 ## Agent workflow
 
 1. **Confirm the target and task.** Read its instructions, current README, project brief, design records, tests, examples, tracking issue or handoff, visual adapter, and relevant prior reviewed outputs. Record the target repository and exact inspected revision.
 2. **Build the evidence map.** Separate repository facts, user observations, owner decisions, external sources, experimental results, inferences, hypotheses, and unknowns. Give each source a stable ID and a precise locator.
-3. **Draft the story spine.** Record the primary reader and job, the triggering situation, friction, consequence, desired outcome, project response, plain-language mechanism, evidence boundary, and next action.
-4. **Choose the reader path.** Put the main story first. Add a distinct developer/researcher path when those readers need commands, architecture, datasets, or reproducibility details.
-5. **Write and cite.** Explain the problem with a concrete repository-grounded example. Introduce the project's response and mechanism after the reason to care. Place direct citations beside material factual claims; use a compact evidence section for deeper verification.
-6. **Apply the target's visual contract.** Keep the target's identity and the existing CGM image-generation/use rules. Visuals explain the same story; they do not substitute for the prose or its evidence.
-7. **Review and validate.** Run the deterministic contract, the heading-and-bold scan, the reader tasks, source-resolution checks, image checks, and the human review. Label unresolved evidence plainly.
+3. **Resolve scope conflicts.** Pinned implementation and tests establish shipped behavior. The narrowest current acceptance contract controls planned scope. Broad epics record direction; older docs record history. Explicit non-goals and “not frozen” statements override broad roadmap paths. Keep unresolved conflicts visible as unknown.
+4. **Draft the story spine.** Record the primary reader and job, the triggering situation, friction, consequence, desired outcome, project response, plain-language mechanism, evidence boundary, and next action.
+5. **Choose the reader path.** Put the main story first. Add a distinct developer/researcher path when those readers need commands, architecture, datasets, or reproducibility details.
+6. **Write and cite.** Explain the problem with a concrete repository-grounded example. Introduce the project's response and mechanism after the reason to care. Place direct citations beside material factual claims; use a compact evidence section for deeper verification. Put one to eight high-risk, evidence-backed exclusions in `must_preserve` and repeat them verbatim in the README for helper `0.4.1` and later.
+7. **Apply the target's visual contract.** Keep the target's identity and the existing CGM image-generation/use rules. Visuals explain the same story; they do not substitute for the prose or its evidence. Check rendered imagery for implied behavior that conflicts with `must_preserve`.
+8. **Review and validate.** Run the deterministic contract, the heading-and-bold scan, the reader tasks, source-resolution checks, image checks, and the human review. Label unresolved evidence plainly.
 
 ## Reader story model
 

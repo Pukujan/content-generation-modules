@@ -13,10 +13,13 @@ Use this module whenever the agent is entering a new repository or the product s
 2. Identify the real user, job, problem, solution, mechanism, proof, and limitations.
 3. Record exact file paths for evidence.
 4. Mark each claim as shipped, experimentally supported, planned, or unknown.
-5. For each material claim, record what its evidence supports, what it does not establish, an exact source revision/locator or direct external citation, and timezone-aware `recorded_at` time.
-6. For claims that apply only during a known period, add `valid_time` bounds and keep them separate from source event dates and record time.
-7. Record technical terms that need plain-language translation.
-8. Store the result in `project-brief.json` using the schema version pinned by the target adapter. For helper `0.4.x`, use project-brief v2.
+5. Resolve scope conflicts before drafting: pinned implementation/tests establish shipped behavior; the narrowest current acceptance contract controls a planned release; broad epics describe direction; older documents are historical. Explicit exclusions and “not frozen” terms override broad roadmap paths. Record unresolved conflicts as unknown.
+6. For each material claim, record what its evidence supports, what it does not establish, an exact source revision/locator or direct external citation, and timezone-aware `recorded_at` time.
+7. For claims that apply only during a known period, add `valid_time` bounds and keep them separate from source event dates and record time.
+8. Record technical terms that need plain-language translation.
+9. Store the result in `project-brief.json` using the schema version pinned by the target adapter. For helper `0.4.x`, use project-brief v2. For `0.4.1` and later, include one to eight concise evidence-backed `must_preserve` boundary sentences.
+10. Create `.content-system/system-version.json` from the pinned helper's `templates/system-version.json`. Set `schema_version`, the exact helper repository/version/full commit, and the module list. Do not copy the helper repository's root `system-version.json` into the target adapter; it has a different purpose and shape.
+11. Create the remaining adapter files from their matching templates, then run the pinned validator against the actual output directory before delivery.
 
 ## Output rule
 

@@ -14,6 +14,7 @@ Before producing README copy, marketing copy, UX language, HTML demos, or image-
 1. Read the project's `.content-system/system-version.json` and the relevant module instructions.
 2. Inspect the repository for evidence and identify which claims are supported.
 3. Build or update the project brief before drafting the final output. For helper `0.4.x`, use `content-generation.project-brief.v2` and record what each important source supports, what it does not establish, its exact revision or direct citation, and timezone-aware `recorded_at` time. Use optional `valid_time` bounds for time-bound claims.
+4. Before writing, resolve conflicts between scope sources: implementation/tests establish shipped behavior; the narrowest current acceptance contract controls planned scope; broad epics describe direction; explicit exclusions or “not frozen” statements override broader roadmap paths. For helper `0.4.1` and later, place one to eight evidence-backed `must_preserve` boundary sentences in the project brief and repeat them verbatim in the README.
 4. For README or other human-facing work, read `docs/CONTENT_RESEARCH.md`, `docs/BRAND_DIRECTION.md`, `docs/README_PLAYBOOK.md`, `docs/IMAGE_GUIDE.md`, `docs/PROVENANCE_AND_CITATION.md`, `docs/README_QUALITY_PDD.md`, `docs/README_QUALITY_SDD.md`, `docs/README_QUALITY_TDD.md`, and `templates/readme-contract.json` from the pinned helper version.
 5. Inspect prior reviewed README/content-system outputs in the target repository and preserve their accepted story and visual decisions unless new evidence requires a change.
 6. Start with the human situation and the concrete problem. Develop one source-grounded example and explain its consequence before introducing the product and mechanism.
@@ -24,7 +25,8 @@ Before producing README copy, marketing copy, UX language, HTML demos, or image-
 11. For narrative raster images, include one exact short title and one exact short subtitle in a quiet panel or clear negative space; keep icons, SVGs, logos, and tiny helper graphics text-free.
 12. Record prompt, reference, dimensions, text copy, alt text, README/HTML use, review decision, and rejection reason for generated assets.
 13. Separate deterministic facts from model-assisted opinions.
-14. Before final delivery, provide a short evidence and review summary and confirm every README contract section is present.
+14. Before final delivery, run the pinned helper's deterministic validator against the actual generated adapter and README. Use `python <pinned-cgm>/scripts/validate_content_system.py --root <pinned-cgm> --adapter <output>/.content-system --project-root <output>` with the real task-workspace paths. Fix every `INVALID` result and rerun; do not infer that a package passed from its files or from validation of another directory.
+15. In the handoff, provide the validator command and exact `VALID` result, a short evidence/review summary, and any unresolved human-review limitation. Never report the README package complete while the pinned validator fails.
 
 Ask for missing project facts only when they materially change the output. Otherwise make the smallest explicit assumption and label it.
 ```

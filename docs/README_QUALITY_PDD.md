@@ -1,6 +1,6 @@
 # Product definition: readable, evidence-led project stories
 
-Status: contract proposal for Content Generation Modules `0.4.0`.
+Status: contract proposal for Content Generation Modules `0.4.1`.
 
 ## Problem
 
