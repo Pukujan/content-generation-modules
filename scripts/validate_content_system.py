@@ -46,6 +46,10 @@ COPY_IN_IMAGE_EXCEPTION_RE = re.compile(
     r"\b(?:in[\s-]*image|image|rendered|visible)\b",
     flags=re.IGNORECASE,
 )
+COPY_SUBTITLE_CONTRADICTION_RE = re.compile(
+    r"\bno\s+in[\s-]*image\s+copy\b",
+    flags=re.IGNORECASE,
+)
 WINDOWS_ABSOLUTE_PATH_RE = re.compile(
     r"(?<![\w])(?:[A-Za-z]:[\\/])(?:[^<>\s\[\]()`\"']+)",
     flags=re.IGNORECASE,
@@ -260,9 +264,8 @@ def _asset_copy_policy_contradiction(asset: dict) -> bool:
     if not asset.get("exact_title") or not asset.get("exact_subtitle"):
         return False
 
-    for field in ("exact_title", "exact_subtitle"):
-        if COPY_PROHIBITION_RE.search(str(asset.get(field, ""))):
-            return True
+    if COPY_SUBTITLE_CONTRADICTION_RE.search(str(asset.get("exact_subtitle", ""))):
+        return True
 
     def has_clear_in_image_exception(field_text: str) -> bool:
         clauses = re.split(r"[.;\n]+", field_text)

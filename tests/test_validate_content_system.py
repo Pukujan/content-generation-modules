@@ -324,11 +324,11 @@ class ContentSystemValidationTests(unittest.TestCase):
             "dimensions": "1600x900",
             "text_policy": "Text-free raster; no labels, numbers, logos, or watermark.",
             "prompt_recipe": (
-                "Exact title: Title. Exact subtitle: Subtitle. "
+                "Exact title: Text-free retrieval pathway. Exact subtitle: Research first. "
                 "Text (verbatim): none; no letters, words, numbers, logos, or watermark."
             ),
-            "exact_title": "Title",
-            "exact_subtitle": "Subtitle",
+            "exact_title": "Text-free retrieval pathway",
+            "exact_subtitle": "Research first.",
             "alt_text": "A clear story",
             "usage": "README hero",
             "crop_behavior": "center-safe",
@@ -345,7 +345,7 @@ class ContentSystemValidationTests(unittest.TestCase):
         self.assertTrue(any("prohibits in-image copy" in error for error in errors), errors)
 
         asset["text_policy"] = "Text-free except exact title and subtitle in the image's quiet panel."
-        asset["prompt_recipe"] = "Exact title: Title. Exact subtitle: Subtitle. Text-free except exact title and subtitle in-image."
+        asset["prompt_recipe"] = "Exact title: Text-free retrieval pathway. Exact subtitle: Research first. Text-free except exact title and subtitle in-image."
         errors = check_narrative_assets(visual, {"assets": [asset]})
         self.assertFalse(any("prohibits in-image copy" in error for error in errors), errors)
 
@@ -353,7 +353,7 @@ class ContentSystemValidationTests(unittest.TestCase):
         errors = check_narrative_assets(visual, {"assets": [asset]})
         self.assertTrue(any("missing exact_title" in error for error in errors), errors)
 
-        asset["exact_title"] = "Title"
+        asset["exact_title"] = "Text-free retrieval pathway"
         asset["exact_subtitle"] = ""
         errors = check_narrative_assets(visual, {"assets": [asset]})
         self.assertTrue(any("missing exact_subtitle" in error for error in errors), errors)
