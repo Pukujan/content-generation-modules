@@ -344,14 +344,23 @@ class ContentSystemValidationTests(unittest.TestCase):
 
         self.assertTrue(any("prohibits in-image copy" in error for error in errors), errors)
 
-        asset["text_policy"] = "Text-free except exact title and subtitle in a quiet panel."
-        asset["prompt_recipe"] = "Exact title: Title. Exact subtitle: Subtitle. Text-free except exact title and subtitle."
+        asset["text_policy"] = "Text-free except exact title and subtitle in the image's quiet panel."
+        asset["prompt_recipe"] = "Exact title: Title. Exact subtitle: Subtitle. Text-free except exact title and subtitle in-image."
         errors = check_narrative_assets(visual, {"assets": [asset]})
         self.assertFalse(any("prohibits in-image copy" in error for error in errors), errors)
 
         asset["exact_title"] = ""
         errors = check_narrative_assets(visual, {"assets": [asset]})
         self.assertTrue(any("missing exact_title" in error for error in errors), errors)
+
+        asset["exact_title"] = "Title"
+        asset["exact_subtitle"] = ""
+        errors = check_narrative_assets(visual, {"assets": [asset]})
+        self.assertTrue(any("missing exact_subtitle" in error for error in errors), errors)
+
+        asset["exact_subtitle"] = "No in-image copy; README text carries the explanation."
+        errors = check_narrative_assets(visual, {"assets": [asset]})
+        self.assertTrue(any("prohibits in-image copy" in error for error in errors), errors)
 
     def test_readme_minimum_counts_only_raster_images(self):
         with tempfile.TemporaryDirectory() as directory:

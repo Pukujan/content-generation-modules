@@ -38,9 +38,13 @@ COPY_PROHIBITION_RE = re.compile(
     r"\btext\s*\(\s*verbatim\s*\)\s*:\s*none\b|\bno\s+(?:letters?|words?)\b)",
     flags=re.IGNORECASE,
 )
-COPY_ALLOWANCE_RE = re.compile(
-    r"\b(?:except|allow|allows|include|includes|with)\b.{0,50}\b(?:title|subtitle|copy|text)\b",
-    flags=re.IGNORECASE | re.DOTALL,
+COPY_EXCEPTION_TERM_RE = re.compile(
+    r"\b(?:except|allow|allows|include|includes|with)\b",
+    flags=re.IGNORECASE,
+)
+COPY_IN_IMAGE_EXCEPTION_RE = re.compile(
+    r"\b(?:in[\s-]*image|image|rendered|visible)\b",
+    flags=re.IGNORECASE,
 )
 WINDOWS_ABSOLUTE_PATH_RE = re.compile(
     r"(?<![\w])(?:[A-Za-z]:[\\/])(?:[^<>\s\[\]()`\"']+)",
@@ -255,9 +259,23 @@ def _asset_copy_policy_contradiction(asset: dict) -> bool:
     """Detect explicit no-copy language alongside required title/subtitle fields."""
     if not asset.get("exact_title") or not asset.get("exact_subtitle"):
         return False
+
+    for field in ("exact_title", "exact_subtitle"):
+        if COPY_PROHIBITION_RE.search(str(asset.get(field, ""))):
+            return True
+
+    def has_clear_in_image_exception(field_text: str) -> bool:
+        clauses = re.split(r"[.;\n]+", field_text)
+        return any(
+            COPY_EXCEPTION_TERM_RE.search(clause)
+            and re.search(r"\b(?:title|subtitle)\b", clause, flags=re.IGNORECASE)
+            and COPY_IN_IMAGE_EXCEPTION_RE.search(clause)
+            for clause in clauses
+        )
+
     for field in ("text_policy", "prompt_recipe"):
         field_text = str(asset.get(field, ""))
-        if COPY_PROHIBITION_RE.search(field_text) and not COPY_ALLOWANCE_RE.search(field_text):
+        if COPY_PROHIBITION_RE.search(field_text) and not has_clear_in_image_exception(field_text):
             return True
     return False
 
