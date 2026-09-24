@@ -1,6 +1,6 @@
 # Migrating to Content Generation Modules 0.4
 
-Version `0.4.0` strengthened how a README explains its claims and source trail. Version `0.4.1` adds a required protected-boundary field for new target adapters and validates that its exact wording appears in the README. Both keep the existing human-first story order, brand ownership, visual direction, and image-generation requirements from `0.3.x`.
+Version `0.4.0` strengthened how a README explains its claims and source trail. Version `0.4.1` adds a required protected-boundary field for new target adapters and validates that its exact wording appears in the README. Version `0.4.2` keeps those immutable citations readable through concise link labels and rejects raw URLs in visible README prose. These releases keep the existing human-first story order, brand ownership, visual direction, and image-generation requirements from `0.3.x`.
 
 ## What changes
 
@@ -30,6 +30,7 @@ For helper `0.4.1` and later, `project-brief.json` must include an exhaustive `b
 6. Revisit any claim whose source is missing, stale, private, or weaker than its wording. Qualify it or mark it `unknown`.
 7. Run the pinned helper's validator against the actual README and adapter, then complete the target's reader, evidence, image, and human review checks. Do not report completion on an `INVALID` result.
 8. For helper `0.4.1` and later, resolve conflicts between broad roadmap material and narrower current acceptance contracts, record the controlling source in the brief, exhaustively inventory the boundaries, and verify every declared boundary appears in the README and every `must_preserve` entry matches one.
+9. For helper `0.4.2` and later, keep full pinned source URLs in Markdown destinations and use concise descriptive link labels in visible copy. Run the pinned validator to catch raw unlinked web URLs; the source remains directly verifiable without making the README overflow on narrow screens.
 
 The starter shape is in [`templates/project-brief.json`](../templates/project-brief.json); the machine-readable contract is [`schemas/project-brief.v2.schema.json`](../schemas/project-brief.v2.schema.json). See [`PROVENANCE_AND_CITATION.md`](PROVENANCE_AND_CITATION.md) for source-kind guidance and [`README_QUALITY_TDD.md`](README_QUALITY_TDD.md) for acceptance and metamorphic tests.
 
@@ -39,4 +40,4 @@ Do not replace the target's visual identity with CGM's default brand. Continue f
 
 ## Compatibility
 
-Targets pinned to `0.3.x` may keep project-brief v1 and their existing checks. A target that pins helper `0.4.0` or later must use project-brief v2. A target pinned to `0.4.1` or later must also provide `must_preserve`, declare its complete boundary inventory, and repeat every declared boundary in its README. Do not change a target adapter's version pin until its brief, README citations, boundary disclosures, and review are ready together.
+Targets pinned to `0.3.x` may keep project-brief v1 and their existing checks. A target that pins helper `0.4.0` or later must use project-brief v2. A target pinned to `0.4.1` or later must also provide `must_preserve`, declare its complete boundary inventory, and repeat every declared boundary in its README. A target pinned to `0.4.2` or later must also use descriptive visible citation labels and keep raw URLs out of user-facing prose. Do not change a target adapter's version pin until its brief, README citations, boundary disclosures, and review are ready together.

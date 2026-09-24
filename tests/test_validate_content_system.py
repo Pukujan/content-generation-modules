@@ -93,6 +93,26 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check(target)
             self.assertTrue(any("must declare content-generation.must-preserve.v1" in error for error in errors), errors)
 
+    def test_repository_contract_requires_042_citation_presentation_policy(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / "helper"
+            shutil.copytree(
+                ROOT,
+                target,
+                ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"),
+            )
+            version_path = target / "system-version.json"
+            version = json.loads(version_path.read_text(encoding="utf-8"))
+            del version["citation_presentation_contract"]
+            version_path.write_text(json.dumps(version), encoding="utf-8")
+
+            errors = check(target)
+
+            self.assertTrue(
+                any("must declare content-generation.citation-presentation.v1 from 0.4.2" in error for error in errors),
+                errors,
+            )
+
     def test_readme_gate_rejects_a_technical_only_readme(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
@@ -151,6 +171,33 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check_readme(target)
 
             self.assertTrue(any("commit-pinned GitHub blob/tree link" in error for error in errors), errors)
+
+    def test_readme_gate_rejects_visible_raw_urls_but_allows_link_destinations_and_code(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            (target / "templates").mkdir()
+            (target / "templates" / "readme-contract.json").write_bytes(
+                (ROOT / "templates" / "readme-contract.json").read_bytes()
+            )
+            commit = "e" * 40
+            (target / "README.md").write_text(
+                "# Project\n\n"
+                "Read the report at https://example.invalid/reports/long-path.\n\n"
+                f"[Pinned source](HTTPS://github.com/Pukujan/demo/blob/{commit}/docs/source.md).\n\n"
+                "<a href=\"https://example.invalid/html-source\">HTML source</a>\n\n"
+                "![Local label](https://example.invalid/linked-image.png)\n\n"
+                "Use `https://example.invalid/inline` in this example.\n\n"
+                "```text\n"
+                "https://example.invalid/fenced\n"
+                "```\n",
+                encoding="utf-8",
+            )
+
+            errors = check_readme(target)
+
+            raw_url_errors = [error for error in errors if "unlinked web URL" in error]
+            self.assertEqual(len(raw_url_errors), 1, errors)
+            self.assertIn("line 3", raw_url_errors[0])
 
     def test_readme_gate_rejects_absolute_local_paths_but_allows_code_examples(self):
         with tempfile.TemporaryDirectory() as directory:

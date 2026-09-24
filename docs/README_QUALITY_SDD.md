@@ -1,6 +1,6 @@
 # System design: story spine and evidence lineage
 
-Status: contract proposal for Content Generation Modules `0.4.1`.
+Status: contract proposal for Content Generation Modules `0.4.2`.
 
 ## Agent workflow
 
@@ -9,7 +9,7 @@ Status: contract proposal for Content Generation Modules `0.4.1`.
 3. **Resolve scope conflicts.** Pinned implementation and tests establish shipped behavior. The narrowest current acceptance contract controls planned scope. Broad epics record direction; older docs record history. Explicit non-goals and “not frozen” statements override broad roadmap paths. Keep unresolved conflicts visible as unknown.
 4. **Draft the story spine.** Record the primary reader and job, the triggering situation, friction, consequence, desired outcome, project response, plain-language mechanism, evidence boundary, and next action.
 5. **Choose the reader path.** Put the main story first. Add a distinct developer/researcher path when those readers need commands, architecture, datasets, or reproducibility details.
-6. **Write and cite.** Explain the problem with a concrete repository-grounded example. Introduce the project's response and mechanism after the reason to care. Place direct citations beside material factual claims; use a compact evidence section for deeper verification. For helper `0.4.1` and later, exhaustively inventory source-backed exclusions, explicit non-goals, not-implemented or deferred status, and owner or private-data limits in `boundaries`; repeat every declared boundary verbatim in the README, with one to eight high-risk entries selected into `must_preserve` as an exact subset.
+6. **Write and cite.** Explain the problem with a concrete repository-grounded example. Introduce the project's response and mechanism after the reason to care. Place direct citations beside material factual claims; use a compact evidence section for deeper verification. Show source titles or concise descriptive link labels while retaining immutable permalinks in their destinations. For helper `0.4.1` and later, exhaustively inventory source-backed exclusions, explicit non-goals, not-implemented or deferred status, and owner or private-data limits in `boundaries`; repeat every declared boundary verbatim in the README, with one to eight high-risk entries selected into `must_preserve` as an exact subset. For helper `0.4.2` and later, do not print raw web URLs in the reader-facing prose.
 7. **Apply the target's visual contract.** Keep the target's identity and the existing CGM image-generation/use rules. Visuals explain the same story; they do not substitute for the prose or its evidence. Check rendered imagery for implied behavior that conflicts with `must_preserve`.
 8. **Review and validate.** Run the deterministic contract, the heading-and-bold scan, the reader tasks, source-resolution checks, image checks, and the human review. Label unresolved evidence plainly.
 

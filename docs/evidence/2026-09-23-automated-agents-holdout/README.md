@@ -53,3 +53,7 @@ The copied target README is from a public, pinned repository. No private target 
 ## What this evidence is for
 
 Use the paired artifacts to inspect the actual writing and generated images, trace which helper version produced each package, and challenge the evaluation result. Use the holdout and metamorphic tests in [`docs/HOLDOUT_EVALUATION.md`](../../HOLDOUT_EVALUATION.md) and [`docs/README_QUALITY_TDD.md`](../../README_QUALITY_TDD.md) to guide the next validation. The privacy-safe report for the separate blind Luna transfer is in [`BLIND_LUNA_TRANSFER.md`](BLIND_LUNA_TRANSFER.md). Do not use these individual comparisons as a blanket claim that README quality or image quality is solved.
+
+The owner's later preference review of nine supplied image candidates is recorded separately in [`2026-09-24-owner-image-review.md`](../2026-09-24-owner-image-review.md). It preserves the original list order and per-image hashes: positions 1–7 were preferred; positions 8–9 were not preferred. The record does not copy the supplied image files or identify their source project.
+
+A separate `0.4.1` transfer exposed a citation-layout failure that the pinned validator missed. Its privacy-safe finding and the `0.4.2` response are in [`2026-09-24-citation-layout-holdout.md`](../2026-09-24-citation-layout-holdout.md); target-specific README and image files remain local.

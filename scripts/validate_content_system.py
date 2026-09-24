@@ -198,7 +198,7 @@ def _check_github_commit_pinned_links(readme_text: str) -> list[str]:
     return errors
 
 
-def _user_facing_readme_lines(readme_text: str):
+def _readme_lines_without_code(readme_text: str):
     """Yield README lines with fenced and inline code removed."""
     fence: str | None = None
     for line_number, line in enumerate(readme_text.splitlines(), start=1):
@@ -213,8 +213,40 @@ def _user_facing_readme_lines(readme_text: str):
         if fence is not None:
             continue
         without_inline_code = re.sub(r"`[^`\n]*`", "", line)
-        without_urls = re.sub(r"(?i)\b(?:https?|file)://[^\s<>()\[\]]+", "", without_inline_code)
+        yield line_number, without_inline_code
+
+
+def _user_facing_readme_lines(readme_text: str):
+    for line_number, line in _readme_lines_without_code(readme_text):
+        without_urls = re.sub(r"(?i)\b(?:https?|file)://[^\s<>()\[\]]+", "", line)
         yield line_number, without_urls
+
+
+def _check_readme_visible_raw_urls(readme_text: str) -> list[str]:
+    errors: list[str] = []
+    url_pattern = re.compile(r"(?i)\bhttps?://[^\s<>()[\]]+")
+    markdown_link_pattern = re.compile(
+        r"!?\[([^\]]*)\]\(\s*(?:<https?://[^>]+>|https?://[^\s)]+)"
+        r"(?:\s+(?:\"[^\"]*\"|'[^']*'))?\s*\)",
+        flags=re.IGNORECASE,
+    )
+    reference_definition_pattern = re.compile(
+        r"^\s{0,3}\[[^\]]+\]:\s*<?https?://[^\s>]+>?"
+        r"(?:\s+[\"'][^\"']*[\"'])?\s*$",
+        flags=re.IGNORECASE,
+    )
+    for line_number, line in _readme_lines_without_code(readme_text):
+        if reference_definition_pattern.match(line):
+            continue
+        visible = markdown_link_pattern.sub(r"\1", line)
+        visible = re.sub(r"<(?!https?://)[^>]*>", "", visible)
+        for match in url_pattern.finditer(visible):
+            url = match.group(0).rstrip(".,;:!?")
+            errors.append(
+                "README exposes an unlinked web URL in user-facing content "
+                f"at line {line_number}: {url}; use a descriptive Markdown link label"
+            )
+    return errors
 
 
 def _check_readme_absolute_local_paths(readme_text: str) -> list[str]:
@@ -561,6 +593,7 @@ def check_readme(
 
     text = readme_path.read_text(encoding="utf-8")
     errors.extend(_check_github_commit_pinned_links(text))
+    errors.extend(_check_readme_visible_raw_urls(text))
     errors.extend(_check_readme_absolute_local_paths(text))
     if enforce_sections:
         for section in contract.get("required_sections", []):
@@ -705,6 +738,14 @@ def check(root: Path) -> list[str]:
             errors.append("system-version.json boundary disclosure must be required from 0.4.1")
         if not boundary_contract.get("readme_rule"):
             errors.append("system-version.json boundary_disclosure_contract must define its README rule")
+    if _version_tuple(version.get("version")) >= (0, 4, 2):
+        citation_contract = version.get("citation_presentation_contract", {})
+        if citation_contract.get("version") != "content-generation.citation-presentation.v1":
+            errors.append("system-version.json must declare content-generation.citation-presentation.v1 from 0.4.2")
+        if not citation_contract.get("rule"):
+            errors.append("system-version.json citation_presentation_contract must define its display rule")
+        if citation_contract.get("required_for_helper_version") != "0.4.2":
+            errors.append("system-version.json citation presentation must be required from 0.4.2")
     scanability = version.get("scanability_contract", {})
     if scanability.get("version") != "content-generation.scanability.v1":
         errors.append("system-version.json must declare content-generation.scanability.v1")

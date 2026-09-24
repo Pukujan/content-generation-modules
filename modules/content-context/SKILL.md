@@ -19,8 +19,9 @@ Use this module whenever the agent is entering a new repository or the product s
 8. Record technical terms that need plain-language translation.
 9. Build the boundary inventory exhaustively from source-backed exclusions, explicit non-goals, not-implemented or deferred status, and owner or private-data limits. Keep each boundary concise, traceable to its source, and in `boundaries`; do not treat `must_preserve` as a replacement for that inventory.
 10. Store the result in `project-brief.json` using the schema version pinned by the target adapter. For helper `0.4.x`, use project-brief v2. For `0.4.1` and later, every declared boundary must be copied verbatim into the README, and `must_preserve` may select one to eight entries only when each exactly matches a declared boundary.
-11. Create `.content-system/system-version.json` from the pinned helper's `templates/system-version.json`. Set `schema_version`, the exact helper repository/version/full commit, and the module list. Do not copy the helper repository's root `system-version.json` into the target adapter; it has a different purpose and shape.
-12. Create the remaining adapter files from their matching templates, then run the pinned validator against the actual output directory before delivery.
+11. For helper `0.4.2` and later, keep full pinned source URLs in Markdown destinations and use concise descriptive link labels in visible copy. Do not print raw web URLs in the README.
+12. Create `.content-system/system-version.json` from the pinned helper's `templates/system-version.json`. Set `schema_version`, the exact helper repository/version/full commit, and the module list. Do not copy the helper repository's root `system-version.json` into the target adapter; it has a different purpose and shape.
+13. Create the remaining adapter files from their matching templates, then run the pinned validator against the actual output directory before delivery.
 
 ## Output rule
 

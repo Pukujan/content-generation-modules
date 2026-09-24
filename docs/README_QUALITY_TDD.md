@@ -1,6 +1,6 @@
 # Test design: readable, traceable, repeatable output
 
-Status: acceptance plan for Content Generation Modules `0.4.1`.
+Status: acceptance plan for Content Generation Modules `0.4.2`.
 
 ## Behavior contract: a fresh agent serves a first-time reader
 
@@ -15,7 +15,8 @@ Then a first-time reader can recognize the human situation and consequence,
      scan the headings and selective bold anchors as a coherent second story,
      distinguish shipped facts, plans, unknowns, and evidence limits,
      see every evidence-backed `must_preserve` boundary stated plainly,
-     follow citations back to immutable sources,
+     follow concise descriptive citations back to immutable sources,
+     use the page at narrow widths without raw links forcing horizontal scroll,
      find a concrete next action,
      and use two distinct, target-appropriate generated raster visuals with
      the required copy, accessibility, crop, review, prompt, and hash records.
@@ -68,6 +69,7 @@ Record task success, incorrect or missing answers, source-resolution success, an
 - Repository source revisions include an exact repository, full revision, path, locator, and immutable direct permalink.
 - External source revisions include a direct URI and access date; publication date is recorded when available.
 - Important public claims have a direct citation near the claim or in an immediately relevant evidence section.
+- For helper `0.4.2` and later, visible web citations use concise descriptive Markdown link text while retaining the full pinned URL in the destination; unlinked raw web URLs in README prose fail validation, while link destinations and code examples remain allowed.
 - The source supports the stated status; a plan cannot be presented as shipped, and unknown claims remain explicitly unknown.
 - No missing source, vague revision, invalid status, unsupported source type, or self-attestation as sole behavioral proof passes silently.
 - `0.3.x` adapters remain valid under their pinned contract; `0.4.x` requires project-brief v2.
@@ -94,7 +96,8 @@ For each target-specific hero and supporting raster, a human reviewer should rec
 - hero and supporting assets have distinct, complementary roles rather than repeating one scene;
 - palette, composition, subject treatment, and typography feel cohesive across the set;
 - the rendered pixels contain the declared exact title and subtitle copy without garbling or contradiction;
-- the actual README/HTML rendering remains useful at desktop and mobile widths, including the declared crop-safe subjects and copy.
+- the actual README/HTML rendering remains useful at desktop and mobile widths, including the declared crop-safe subjects and copy;
+- citations remain descriptive and the page does not need horizontal scrolling to read long link destinations.
 
 These are acceptance judgments, not claims that a validator can prove an image is beautiful. Do not impose one global anime, robot, or character style: derive the art direction from the target's visual contract, audience, and supplied references. A deterministic validator may catch missing metadata or an explicit copy-policy contradiction, but the reviewer remains responsible for pixel-level quality, brand fit, story usefulness, and crop acceptance.
 

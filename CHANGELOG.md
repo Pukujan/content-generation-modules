@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.2 — draft
+
+- require human-readable Markdown link labels for visible web citations while keeping exact revisions and source paths in the link destination;
+- reject unlinked web URLs in user-facing README prose while allowing URLs in Markdown link destinations, HTML attributes, and code examples;
+- add regression coverage from an independent 0.4.1 holdout whose raw provenance URLs forced a 390px viewport to 918px of horizontal content;
+- keep the narrative image-generation guidance, visual identity, and asset requirements unchanged.
+
 ## 0.4.1 — draft
 
 - added `must_preserve` boundary disclosures to target briefs and a deterministic check that the generated README states each one verbatim;

@@ -63,6 +63,7 @@ The research behind these rules is in [`CONTENT_RESEARCH.md`](CONTENT_RESEARCH.m
 - bold one short, meaningful anchor when it helps a reader recover the point quickly;
 - use bold for a problem, outcome, mechanism, proof, or boundary rather than for generic adjectives;
 - read only the headings, bold phrases, and link text as a second-story test;
+- make citation link text describe its destination; keep full commit-pinned URLs in the Markdown destination instead of printing them in reader-facing copy;
 - keep the text understandable if bold styling disappears;
 - use semantic headings and descriptive links so the visual treatment does not carry structure by itself.
 
@@ -90,6 +91,8 @@ For each important claim, record:
 Before drafting, resolve conflicts between source documents about what is in scope. Pinned implementation and tests establish what is shipped. The narrowest current acceptance contract controls a planned release; broader epics describe direction, and older documents are historical context. An explicit non-goal or “not frozen” statement overrides a broad roadmap path. Record unresolved conflicts as unknown instead of blending the claims.
 
 For helper `0.4.x`, record what evidence `supports` and what it `limits`, its `source_revision`, and a timezone-aware `recorded_at` timestamp on each material evidence item. For a time-bound claim, record `valid_time` separately. Link important public claims near the sentence they support. Repository links should pin the inspected commit; external sources should link directly and record an access date when the page can change. A reference makes the claim traceable, not automatically true.
+
+For helper `0.4.2` and later, keep the immutable permalink in the Markdown link destination and show a short descriptive label such as `[Evidence verification contract](<pinned permalink>)`. Do not print raw web URLs in user-facing README prose; this preserves provenance while keeping the page scannable and preventing long links from breaking narrow layouts. URLs inside code examples and actual Markdown link destinations are not visible prose.
 
 For helper `0.4.1` and later, build the `boundaries` inventory exhaustively from source-backed exclusions, explicit non-goals, not-implemented or deferred status, and owner or private-data limits. Every declared boundary must appear verbatim in the README. Then add one to eight short `must_preserve` sentences as a subset of that inventory; each entry must exactly match a declared boundary and should represent an especially risky exclusion or qualification. Keep each sentence concise and cite its evidence nearby. The pinned validator checks declared-string coverage and subset membership, but it cannot prove that source extraction itself was complete; independent factual review remains required.
 

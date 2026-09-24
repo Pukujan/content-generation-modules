@@ -26,7 +26,7 @@ Explain the mechanism in reader-sized steps. Introduce technical terms at the mo
 
 ## Evidence and boundaries
 
-Link important claims directly to code, tests, data, committed artifacts, experiments, or external sources. Label work as shipped, experimentally supported, planned, or unknown. State what the cited evidence supports, what it leaves unproven, and what the project does not claim. Pin repository citations to the inspected commit and useful path/line or heading; use direct external links.
+Link important claims directly to code, tests, data, committed artifacts, experiments, or external sources. Label work as shipped, experimentally supported, planned, or unknown. State what the cited evidence supports, what it leaves unproven, and what the project does not claim. Pin repository citations to the inspected commit and useful path/line or heading; use direct external links. Show concise descriptive link text and keep the immutable URL in the link destination rather than printing it in the README prose.
 
 | Claim | What the evidence supports | What it does not establish | Source |
 | --- | --- | --- | --- |
