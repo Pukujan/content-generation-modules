@@ -1,6 +1,6 @@
 {
   "system": "content-generation-modules",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "status": "draft",
   "purpose": "Reusable agent contract for human-first brand, content, visual, image, and HTML-demo generation.",
   "modules": [
@@ -12,6 +12,7 @@
     "html-demo"
   ],
   "canonical_files": [
+    "system-version.json",
     "project-brief.json",
     "brand-language.json",
     "visual-style.json",
@@ -19,8 +20,10 @@
     "review-rubric.json"
   ],
   "helper_contract_files": [
+    "templates/system-version.json",
     "templates/readme-contract.json",
     "templates/project-brief.json",
+    "schemas/adapter-system-version.schema.json",
     "schemas/readme-contract.schema.json",
     "schemas/project-brief.v2.schema.json",
     "docs/CONTENT_RESEARCH.md",
@@ -62,12 +65,26 @@
     "truth_boundary": "citation establishes traceability, not truth",
     "required_for_helper_version": "0.4.0"
   },
+  "boundary_disclosure_contract": {
+    "version": "content-generation.must-preserve.v1",
+    "field": "project-brief.v2.must_preserve",
+    "inventory_field": "project-brief.v2.boundaries",
+    "minimum": 1,
+    "maximum": 8,
+    "required_for_helper_version": "0.4.1",
+    "readme_rule": "Every declared project-brief boundary appears verbatim in the target README; each evidence-backed must_preserve sentence is an exact member of that boundary inventory and also appears verbatim."
+  },
   "scanability_contract": {
     "version": "content-generation.scanability.v1",
     "heading_rule": "Use descriptive headings that tell the reader what they will learn or gain.",
     "bolding_rule": "Use one short meaningful anchor when helpful, usually 2–8 words, for a problem, outcome, mechanism, proof, or boundary.",
     "scan_test": "Read only headings, bold phrases, and link text; they should communicate the problem, promise, mechanism, boundary, and next action.",
     "accessibility_rule": "Keep the text understandable when bold styling disappears and use semantic headings for structure."
+  },
+  "citation_presentation_contract": {
+    "version": "content-generation.citation-presentation.v1",
+    "rule": "Keep immutable source URLs in Markdown destinations and show concise descriptive link text; do not print raw web URLs in user-facing README prose.",
+    "required_for_helper_version": "0.4.2"
   },
   "quality_model": {
     "objective": "deterministic checks and repository evidence",

@@ -1,0 +1,16 @@
+{
+  "schema_version": "content-generation.adapter.v1",
+  "helper_repository": "https://github.com/Pukujan/content-generation-modules",
+  "helper_version": "0.4.2",
+  "helper_commit": "REPLACE_WITH_THE_PINNED_40_CHARACTER_COMMIT",
+  "modules": [
+    "brand-foundation",
+    "content-context",
+    "writing-direction",
+    "visual-direction",
+    "image-generation",
+    "html-demo"
+  ],
+  "target_repository": "OWNER/REPOSITORY",
+  "target_commit": "REPLACE_WITH_THE_TARGET_40_CHARACTER_COMMIT"
+}

@@ -1,12 +1,14 @@
 # Product definition: readable, evidence-led project stories
 
-Status: contract proposal for Content Generation Modules `0.4.0`.
+Status: contract proposal for Content Generation Modules `0.4.2`.
 
 ## Problem
 
 A repository can follow a README outline and still leave its reader unsure why the project matters. Section presence does not guarantee an explanation: an agent may state a category, list modules, and link a source without showing the situation that led to the work, what went wrong, what changes for a person, or what the evidence actually supports.
 
 The same gap affects trust. A short `claim`, `source`, and `status` record does not explain what a source establishes, what it leaves unproven, or which repository revision was inspected. The prose can sound polished while its evidence trail is difficult to reproduce.
+
+A long raw citation can also make a careful README hard to read. The full revision belongs in the link destination and source record; readers need a short label that tells them what the source is. Printed commit URLs can overwhelm a link section and force horizontal scrolling on narrow screens.
 
 Operational claims also change over time. A durable record needs to distinguish when a fact applied from when the project recorded or corrected it, while keeping the owning request in the repository's issue history.
 
@@ -34,6 +36,7 @@ This is a testable hypothesis, not a promise of a fixed usability or conversion 
 5. Make a new ChatGPT session able to reproduce the process from the pinned CGM contract and target-repository context.
 6. Keep CGM's existing narrative image generation, brand, prompt, copy, accessibility, crop, review, and provenance requirements intact.
 7. Use the tracked GitHub issue as the change owner and PR/commit history as the operational record; distinguish valid time from record time when a claim is time-bound.
+8. Preserve exact citation provenance while keeping visible link text concise, descriptive, and usable on narrow screens.
 
 ## Non-goals
 
@@ -46,6 +49,6 @@ This is a testable hypothesis, not a promise of a fixed usability or conversion 
 
 ## Success measures
 
-On a blinded reader task, a first-time reader should be able to identify the project's primary reader, problem, useful outcome, current status, main evidence boundary, and next action. A reviewer should be able to resolve each required citation to its recorded source revision and locator. Unsupported claims, stale evidence, or mismatched status must be visible rather than polished away.
+On a blinded reader task, a first-time reader should be able to identify the project's primary reader, problem, useful outcome, current status, main evidence boundary, and next action. A reviewer should be able to resolve each required descriptive citation label to its recorded source revision and locator without raw URLs forcing horizontal scrolling at narrow widths. Unsupported claims, stale evidence, or mismatched status must be visible rather than polished away.
 
 The release decision uses deterministic contract checks, reader-task results, independent editorial review, and a separate visual/image non-regression review. No single model score decides success. The reference repositories shape the development contract and are not holdouts.

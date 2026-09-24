@@ -1,0 +1,37 @@
+{
+  "schema_version": "content-generation.brand-language.v1",
+  "name": "Automated Agents",
+  "personality": [
+    "careful",
+    "direct",
+    "evidence-led",
+    "warm",
+    "bounded"
+  ],
+  "audience_feeling": "The reader should feel oriented, respected, and able to choose a safe next question without being pushed into an external action.",
+  "promise": "Turn one career or positioning question into bounded research, visible uncertainty, and an explicit next proposal.",
+  "preferred_terms": {
+    "bounded research": "focused collection with explicit budgets and stop conditions",
+    "evidence": "observations with provenance and limitations",
+    "proposal": "a recommendation awaiting review or approval",
+    "owner": "the person who decides identity, profile, and external actions",
+    "private FOSSIL": "the intended private store for personal evidence and proposals"
+  },
+  "avoid": [
+    "autonomous",
+    "guaranteed",
+    "effortless",
+    "proven fit",
+    "magic",
+    "production-ready",
+    "the system understands you"
+  ],
+  "good_examples": [
+    "Ask one focused question, preserve what was observed, and label what remains unknown.",
+    "A saved proposal records an idea; it does not make the idea true or approved."
+  ],
+  "bad_examples": [
+    "The agent knows your perfect career path.",
+    "Run the autonomous recruiter and let it contact the right people."
+  ]
+}

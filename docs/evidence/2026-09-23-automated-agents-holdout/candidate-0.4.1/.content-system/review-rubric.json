@@ -1,0 +1,41 @@
+{
+  "schema_version": "content-generation.review-rubric.v1",
+  "dimensions": [
+    {
+      "id": "human_comprehension",
+      "question": "Can a first-time reader explain the career-research situation, bounded proposal, and next action after twenty seconds?",
+      "weight": 2
+    },
+    {
+      "id": "specificity",
+      "question": "Does the README use the target's question, budgets, handoff, storage, and proposal boundaries rather than generic agent language?",
+      "weight": 2
+    },
+    {
+      "id": "claim_safety",
+      "question": "Are repository facts, planned work, manual observations, private evidence, and unknowns clearly separated?",
+      "weight": 3
+    },
+    {
+      "id": "skimmability",
+      "question": "Do descriptive headings, selective bold anchors, and link text recover the situation, mechanism, boundary, and next action?",
+      "weight": 1
+    },
+    {
+      "id": "visual_clarity",
+      "question": "Does each raster image explain one distinct idea without extra text, decorative pseudo-text, or unsupported capability cues?",
+      "weight": 2
+    },
+    {
+      "id": "responsive_fit",
+      "question": "Do the hero and supporting image remain legible and useful when stacked or cropped on a narrow screen?",
+      "weight": 1
+    },
+    {
+      "id": "privacy_boundary",
+      "question": "Does the package keep personal evidence and proposals in private FOSSIL and avoid exposing private captures or credentials?",
+      "weight": 3
+    }
+  ],
+  "decision_rule": "Accept only when claim_safety and privacy_boundary pass, every must_preserve sentence is stated verbatim, both raster records validate, and no weighted dimension is below 3/5; human review remains authoritative for honesty and usefulness."
+}

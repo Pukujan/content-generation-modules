@@ -21,7 +21,12 @@
       "cite_in_readme": false
     }
   ],
-  "boundaries": [],
+  "boundaries": [
+    "Replace with every source-backed exclusion, explicit non-goal, not-implemented or deferred status, or owner/private-data limit that the README must state verbatim."
+  ],
+  "must_preserve": [
+    "Replace this with one declared boundary selected for exact verbatim preservation in the README."
+  ],
   "terminology": {
     "preferred": {},
     "avoid": []

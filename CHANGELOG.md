@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.4.2 — draft
+
+- require human-readable Markdown link labels for visible web citations while keeping exact revisions and source paths in the link destination;
+- reject unlinked web URLs in user-facing README prose while allowing URLs in Markdown link destinations, HTML attributes, and code examples;
+- add regression coverage from an independent 0.4.1 holdout whose raw provenance URLs forced a 390px viewport to 918px of horizontal content;
+- keep the narrative image-generation guidance, visual identity, and asset requirements unchanged.
+
+## 0.4.1 — draft
+
+- added `must_preserve` boundary disclosures to target briefs and a deterministic check that the generated README states each one verbatim;
+- require every declared project-brief boundary to appear verbatim in the target README and require each `must_preserve` entry to be an exact member of that inventory;
+- direct generation guidance to exhaustively extract exclusions, non-goals, not-implemented status, and owner/private-data limits, while keeping independent factual review for extraction completeness;
+- clarified source precedence when a broad roadmap conflicts with a narrower current acceptance contract, and required reviewing visuals for implied excluded behavior;
+- tightened target-adapter provenance, raster-link, manifest-role, helper-pin, and generated-asset checks based on independent fresh-session failures;
+- added a BDD-style reader behavior contract, research-backed distinctions between regression, metamorphic, differential, and holdout evaluation, and executable acceptance criteria;
+- kept the existing image-generation guidance, brand direction, and narrative image requirements unchanged.
+
 ## 0.3.1 — draft
 
 - added a deterministic `0.3.x` narrative-image gate that rejects SVG substitutions, missing built-in image-generation provenance, missing exact title/subtitle records, missing prompt records, and stale file hashes;

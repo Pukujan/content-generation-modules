@@ -33,7 +33,7 @@ Do not turn an observation into a universal finding, an inference into an observ
 
 ## Cite where readers need verification
 
-Place direct links near the claim they support. Use commit-pinned repository permalinks rather than a moving `main` link when the exact revision matters. Give external sources a descriptive title and link; include author/date when it helps identify a publication. For a mutable web page, record when it was accessed in the claim's `source_revision`. Keep the README readable by putting implementation-level provenance in the evidence section or linked record, not by attaching dense metadata to every sentence.
+Place direct links near the claim they support. Use commit-pinned repository permalinks rather than a moving `main` link when the exact revision matters. Give external sources a descriptive title and link; include author/date when it helps identify a publication. For a mutable web page, record when it was accessed in the claim's `source_revision`. Keep the README readable by putting implementation-level provenance in the evidence section or linked record, not by attaching dense metadata to every sentence. For helper `0.4.2` and later, retain the complete immutable URL in the Markdown destination and expose concise descriptive link text; never print a raw web URL as reader-facing prose.
 
 ## Provenance and temporal records
 

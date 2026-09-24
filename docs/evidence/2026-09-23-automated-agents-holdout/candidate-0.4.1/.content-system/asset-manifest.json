@@ -1,0 +1,54 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.4.1",
+  "assets": [
+    {
+      "path": "assets/readme/hero.png",
+      "role": "hero",
+      "orientation": "wide",
+      "dimensions": "1672x941 PNG (16:9)",
+      "text_policy": "Exact title Automated Agents and exact subtitle A research-first design for bounded career and positioning proposals.; no other legible words, labels, fake metrics, dense UI copy, or pseudo-text.",
+      "prompt_recipe": "Use case illustration-story; README hero; reader question why should I care; dominant message scattered career questions become a careful bounded path from research to a next proposal; original researcher and friendly companion; anime-inspired editorial illustration; wide 16:9; exact text Automated Agents / A research-first design for bounded career and positioning proposals.; blank cards and no extra words; wide README hero placement.",
+      "exact_title": "Automated Agents",
+      "exact_subtitle": "A research-first design for bounded career and positioning proposals.",
+      "alt_text": "A career researcher and a small companion organize scattered evidence into a bounded next proposal.",
+      "usage": "README hero directly below the title and subtitle",
+      "crop_behavior": "Wide role; retain the left copy panel and the researcher/companion pair inside the central crop-safe area; review wide and narrow crops.",
+      "rejection_conditions": [
+        "extra words or labels",
+        "garbled or crowded exact copy",
+        "covered subjects",
+        "generic dashboard or unsupported autonomous capability",
+        "narrow crop loses title or human/companion pair"
+      ],
+      "review_decision": "accepted after rejecting a first candidate for extra labels and dense pseudo-UI; final image inspected at original size and in wide/narrow crop review",
+      "provider": "built-in image_gen",
+      "prompt_record": "assets/readme/IMAGE_NOTES.md#accepted-asset-hero",
+      "hash": "362675af87ffcef887839884258d4f4feb25b38031c8aee17d33454a18c6b13a"
+    },
+    {
+      "path": "assets/readme/problem-mechanism.png",
+      "role": "problem",
+      "orientation": "wide",
+      "dimensions": "1672x941 PNG (16:9)",
+      "text_policy": "Exact title Automated Agents and exact subtitle A research-first design for bounded career and positioning proposals.; no other legible words, labels, fake metrics, dense UI copy, or pseudo-text.",
+      "prompt_recipe": "Use case illustration-story; README supporting problem/mechanism image; reader question what problem does the project prevent; dominant message a mixed pile becomes public design, private evidence, and local checkpoints before a proposal is reviewed; original researcher and companion; anime-inspired editorial illustration; wide 16:9; exact text Automated Agents / A research-first design for bounded career and positioning proposals.; blank papers and trays with globe, lock, checkpoint, and shield symbols only; mechanism/evidence-boundary placement.",
+      "exact_title": "Automated Agents",
+      "exact_subtitle": "A research-first design for bounded career and positioning proposals.",
+      "alt_text": "A researcher and companion separate public design, private evidence, and local checkpoints before forming a bounded proposal.",
+      "usage": "README supporting/problem-mechanism image beside the mechanism and evidence-boundary section",
+      "crop_behavior": "Wide role; retain all three trays, the human/companion pair, and shield boundary in the crop-safe center; review wide and narrow crops.",
+      "rejection_conditions": [
+        "extra words or pseudo-text",
+        "decorative line-heavy cards",
+        "hero composition repeated",
+        "generic dashboard or unsupported runtime capability",
+        "narrow crop loses the three lanes or proposal boundary"
+      ],
+      "review_decision": "accepted after rejecting a first candidate for decorative pseudo-text in cards; final image inspected at original size and in wide/narrow crop review",
+      "provider": "built-in image_gen",
+      "prompt_record": "assets/readme/IMAGE_NOTES.md#accepted-asset-problem-mechanism",
+      "hash": "e4cb99dc1c1c31d700be6aa9aac0bb2bf4b39de601376ced6bb5414dc648873c"
+    }
+  ]
+}

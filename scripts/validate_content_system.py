@@ -24,6 +24,40 @@ EXPECTED_MODULES = {
 
 NARRATIVE_ROLE_MARKERS = ("hero", "problem", "supporting", "evidence", "story", "social")
 NARRATIVE_RASTER_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+FULL_COMMIT_RE = r"[0-9a-fA-F]{40}|[0-9a-fA-F]{64}"
+GITHUB_COMMIT_PINNED_LINK_RE = re.compile(
+    rf"https?://(?:www\.)?github\.com/[^\s<>()\[\]\"']+",
+    flags=re.IGNORECASE,
+)
+PROMPT_RECORD_HASH_RE = re.compile(
+    r"^\s*(?:[-*]\s*)?(?:sha-?256|hash)\s*:\s*`?([0-9a-fA-F]+)`?\s*[.,]?\s*$",
+    flags=re.IGNORECASE | re.MULTILINE,
+)
+COPY_PROHIBITION_RE = re.compile(
+    r"(?:\btext[\s-]*free\b|\bno\s+in[\s-]*image\s+copy\b|"
+    r"\btext\s*\(\s*verbatim\s*\)\s*:\s*none\b|\bno\s+(?:letters?|words?)\b)",
+    flags=re.IGNORECASE,
+)
+COPY_EXCEPTION_TERM_RE = re.compile(
+    r"\b(?:except|allow|allows|include|includes|with)\b",
+    flags=re.IGNORECASE,
+)
+COPY_IN_IMAGE_EXCEPTION_RE = re.compile(
+    r"\b(?:in[\s-]*image|image|rendered|visible)\b",
+    flags=re.IGNORECASE,
+)
+COPY_SUBTITLE_CONTRADICTION_RE = re.compile(
+    r"\bno\s+in[\s-]*image\s+copy\b",
+    flags=re.IGNORECASE,
+)
+WINDOWS_ABSOLUTE_PATH_RE = re.compile(
+    r"(?<![\w])(?:[A-Za-z]:[\\/])(?:[^<>\s\[\]()`\"']+)",
+    flags=re.IGNORECASE,
+)
+USER_HOME_PATH_RE = re.compile(
+    r"(?<![\w])(?:[\\/]+Users[\\/][A-Za-z0-9._-]+(?:[\\/][^<>\s\[\]()`\"']*)?)",
+    flags=re.IGNORECASE,
+)
 REQUIRED_NARRATIVE_ASSET_FIELDS = (
     "path",
     "role",
@@ -134,6 +168,187 @@ def _valid_repository_permalink(uri: object, repository: str, commit: str, sourc
         return False
     linked_path = "/".join(parts[commit_index + 1:])
     return linked_path == source_path or linked_path.startswith(f"{source_path}/")
+
+
+def _check_github_commit_pinned_links(readme_text: str) -> list[str]:
+    """Check only GitHub blob/tree URLs that visibly pin a full commit ID.
+
+    This is intentionally structural and offline. Branch links, issue links, and
+    ordinary external references are outside this check.
+    """
+    errors: list[str] = []
+    for match in GITHUB_COMMIT_PINNED_LINK_RE.finditer(readme_text):
+        raw_url = match.group(0).rstrip(".,;:!?")
+        try:
+            parsed = urlparse(raw_url)
+        except ValueError:
+            continue
+        if parsed.netloc.lower().removeprefix("www.") != "github.com":
+            continue
+        parts = [unquote(part) for part in parsed.path.split("/") if part]
+        if len(parts) < 4 or parts[2].lower() not in {"blob", "tree"}:
+            continue
+        if not re.fullmatch(FULL_COMMIT_RE, parts[3]):
+            continue
+        if len(parts) == 4:
+            errors.append(
+                "README contains a malformed commit-pinned GitHub blob/tree link "
+                f"(missing repository path): {raw_url}"
+            )
+    return errors
+
+
+def _readme_lines_without_code(readme_text: str):
+    """Yield README lines with fenced and inline code removed."""
+    fence: str | None = None
+    for line_number, line in enumerate(readme_text.splitlines(), start=1):
+        fence_match = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if fence_match:
+            marker = fence_match.group(1)[0]
+            if fence is None:
+                fence = marker
+            elif marker == fence:
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        without_inline_code = re.sub(r"`[^`\n]*`", "", line)
+        yield line_number, without_inline_code
+
+
+def _user_facing_readme_lines(readme_text: str):
+    for line_number, line in _readme_lines_without_code(readme_text):
+        without_urls = re.sub(r"(?i)\b(?:https?|file)://[^\s<>()\[\]]+", "", line)
+        yield line_number, without_urls
+
+
+def _check_readme_visible_raw_urls(readme_text: str) -> list[str]:
+    errors: list[str] = []
+    url_pattern = re.compile(r"(?i)\bhttps?://[^\s<>()[\]]+")
+    markdown_link_pattern = re.compile(
+        r"!?\[([^\]]*)\]\(\s*(?:<https?://[^>]+>|https?://[^\s)]+)"
+        r"(?:\s+(?:\"[^\"]*\"|'[^']*'))?\s*\)",
+        flags=re.IGNORECASE,
+    )
+    reference_definition_pattern = re.compile(
+        r"^\s{0,3}\[[^\]]+\]:\s*<?https?://[^\s>]+>?"
+        r"(?:\s+[\"'][^\"']*[\"'])?\s*$",
+        flags=re.IGNORECASE,
+    )
+    for line_number, line in _readme_lines_without_code(readme_text):
+        if reference_definition_pattern.match(line):
+            continue
+        visible = markdown_link_pattern.sub(r"\1", line)
+        visible = re.sub(r"<(?!https?://)[^>]*>", "", visible)
+        for match in url_pattern.finditer(visible):
+            url = match.group(0).rstrip(".,;:!?")
+            errors.append(
+                "README exposes an unlinked web URL in user-facing content "
+                f"at line {line_number}: {url}; use a descriptive Markdown link label"
+            )
+    return errors
+
+
+def _check_readme_absolute_local_paths(readme_text: str) -> list[str]:
+    errors: list[str] = []
+    seen: set[tuple[int, str]] = set()
+    for line_number, line in _user_facing_readme_lines(readme_text):
+        windows_matches = list(WINDOWS_ABSOLUTE_PATH_RE.finditer(line))
+        home_matches = [
+            match
+            for match in USER_HOME_PATH_RE.finditer(line)
+            if not any(
+                windows.start() <= match.start() and windows.end() >= match.end()
+                for windows in windows_matches
+            )
+        ]
+        matches = windows_matches + home_matches
+        for match in matches:
+            path_text = match.group(0).rstrip(".,;:!?)]}")
+            key = (line_number, path_text)
+            if key in seen:
+                continue
+            seen.add(key)
+            errors.append(
+                "README contains an absolute local path in user-facing content "
+                f"at line {line_number}: {path_text}"
+            )
+    return errors
+
+
+def _prompt_record_section(prompt_record_text: str, asset_path: str) -> str:
+    """Return the Markdown section that records one asset, when identifiable."""
+    normalized_path = asset_path.replace("\\", "/")
+    filename = Path(normalized_path).name
+    headings = list(re.finditer(r"^#{1,6}\s+.+$", prompt_record_text, flags=re.MULTILINE))
+    if not headings:
+        return prompt_record_text
+    for index, heading in enumerate(headings):
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(prompt_record_text)
+        section = prompt_record_text[heading.start():end]
+        if normalized_path in section.replace("\\", "/") or filename in section:
+            return section
+    return ""
+
+
+def _asset_copy_policy_contradiction(asset: dict) -> bool:
+    """Detect explicit no-copy language alongside required title/subtitle fields."""
+    if not asset.get("exact_title") or not asset.get("exact_subtitle"):
+        return False
+
+    if COPY_SUBTITLE_CONTRADICTION_RE.search(str(asset.get("exact_subtitle", ""))):
+        return True
+
+    def has_clear_in_image_exception(field_text: str) -> bool:
+        clauses = re.split(r"[.;\n]+", field_text)
+        return any(
+            COPY_EXCEPTION_TERM_RE.search(clause)
+            and re.search(r"\b(?:title|subtitle)\b", clause, flags=re.IGNORECASE)
+            and COPY_IN_IMAGE_EXCEPTION_RE.search(clause)
+            for clause in clauses
+        )
+
+    for field in ("text_policy", "prompt_recipe"):
+        field_text = str(asset.get(field, ""))
+        for copy_field in ("exact_title", "exact_subtitle"):
+            declared_copy = str(asset.get(copy_field, ""))
+            if declared_copy:
+                field_text = re.sub(re.escape(declared_copy), "", field_text, flags=re.IGNORECASE)
+        if COPY_PROHIBITION_RE.search(field_text) and not has_clear_in_image_exception(field_text):
+            return True
+    return False
+
+
+def _check_prompt_record_hash(
+    asset: dict,
+    image_path: Path,
+    manifest_digest: str,
+    prompt_record: Path,
+) -> list[str]:
+    errors: list[str] = []
+    try:
+        prompt_record_text = prompt_record.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        errors.append(f"narrative asset prompt record cannot be read: {asset.get('prompt_record')}")
+        return errors
+
+    asset_path = str(asset.get("path", ""))
+    section = _prompt_record_section(prompt_record_text, asset_path)
+    declared_hashes = [match.group(1) for match in PROMPT_RECORD_HASH_RE.finditer(section)]
+    if not declared_hashes:
+        errors.append(f"narrative asset prompt record missing SHA-256 declaration: {asset_path}")
+        return errors
+
+    actual_digest = hashlib.sha256(image_path.read_bytes()).hexdigest() if image_path.is_file() else None
+    for declared_hash in declared_hashes:
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", declared_hash):
+            errors.append(f"narrative asset prompt record hash must be a SHA-256 digest: {asset_path}")
+            continue
+        if declared_hash.lower() != manifest_digest.lower():
+            errors.append(f"narrative asset prompt record hash does not match manifest: {asset_path}")
+        if actual_digest is not None and declared_hash.lower() != actual_digest.lower():
+            errors.append(f"narrative asset prompt record hash does not match file: {asset_path}")
+    return errors
 
 
 def check_project_brief_v2(project: dict, readme_text: str | None = None) -> list[str]:
@@ -281,7 +496,28 @@ def check_narrative_assets(
 
     for asset in manifest.get("assets", []):
         role = str(asset.get("role", "")).lower()
-        if not any(role == marker or role.startswith(f"{marker} ") for marker in role_markers):
+        is_narrative_role = any(
+            role == marker or role.startswith(f"{marker} ") for marker in role_markers
+        )
+        usage = str(asset.get("usage", "")).lower()
+        narrative_usage = any(
+            marker in usage
+            for marker in (
+                "readme hero",
+                "readme problem",
+                "readme supporting",
+                "readme narrative",
+                "hero image",
+                "supporting image",
+                "problem image",
+                "story image",
+            )
+        )
+        if narrative_usage and not is_narrative_role:
+            errors.append(
+                f"narrative asset usage declares a narrative role but its manifest role is not narrative: {asset.get('path', '<unknown>')}"
+            )
+        if not is_narrative_role:
             continue
 
         for field in REQUIRED_NARRATIVE_ASSET_FIELDS:
@@ -300,6 +536,11 @@ def check_narrative_assets(
             errors.append(f"narrative asset prompt must include exact_title: {asset_path}")
         if str(asset.get("exact_subtitle", "")) not in prompt_recipe:
             errors.append(f"narrative asset prompt must include exact_subtitle: {asset_path}")
+        if _asset_copy_policy_contradiction(asset):
+            errors.append(
+                "narrative asset declares exact title/subtitle but its text policy or prompt "
+                f"prohibits in-image copy: {asset_path}"
+            )
 
         digest = str(asset.get("hash", ""))
         if not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
@@ -307,20 +548,41 @@ def check_narrative_assets(
 
         if project_root:
             image_path = project_root / asset_path
-            prompt_record = project_root / str(asset.get("prompt_record", ""))
+            prompt_record_reference = str(asset.get("prompt_record", ""))
+            prompt_record_path = prompt_record_reference.split("#", 1)[0].split("?", 1)[0]
+            prompt_record = project_root / prompt_record_path
             if not prompt_record.is_file():
                 errors.append(f"narrative asset prompt record does not exist: {asset.get('prompt_record')}")
             if image_path.is_file() and re.fullmatch(r"[0-9a-fA-F]{64}", digest):
                 actual_digest = hashlib.sha256(image_path.read_bytes()).hexdigest()
                 if actual_digest.lower() != digest.lower():
                     errors.append(f"narrative asset hash does not match file: {asset_path}")
+                if prompt_record.is_file():
+                    errors.extend(
+                        _check_prompt_record_hash(
+                            asset,
+                            image_path,
+                            digest,
+                            prompt_record,
+                        )
+                    )
 
     return errors
 
 
-def check_readme(root: Path) -> list[str]:
+def check_readme(
+    root: Path,
+    content_root: Path | None = None,
+    *,
+    visual: dict | None = None,
+    manifest: dict | None = None,
+    include_required_references: bool = True,
+    check_guides: bool = True,
+    enforce_sections: bool = True,
+) -> list[str]:
     errors: list[str] = []
-    readme_path = root / "README.md"
+    readme_root = content_root or root
+    readme_path = readme_root / "README.md"
     if not readme_path.is_file():
         return ["missing README.md"]
 
@@ -330,10 +592,14 @@ def check_readme(root: Path) -> list[str]:
         return [str(exc)]
 
     text = readme_path.read_text(encoding="utf-8")
-    for section in contract.get("required_sections", []):
-        heading = section.get("heading")
-        if heading and f"## {heading}" not in text:
-            errors.append(f"README missing required section: {heading}")
+    errors.extend(_check_github_commit_pinned_links(text))
+    errors.extend(_check_readme_visible_raw_urls(text))
+    errors.extend(_check_readme_absolute_local_paths(text))
+    if enforce_sections:
+        for section in contract.get("required_sections", []):
+            heading = section.get("heading")
+            if heading and f"## {heading}" not in text:
+                errors.append(f"README missing required section: {heading}")
 
     story_heading = "## Why this exists"
     mechanism_heading = "## How it works"
@@ -347,9 +613,10 @@ def check_readme(root: Path) -> list[str]:
     if first_code_block != -1 and story_position != -1 and first_code_block < story_position:
         errors.append("README must place technical code after the human situation")
 
-    for reference in contract.get("required_references", []):
-        if reference not in text:
-            errors.append(f"README missing required reference: {reference}")
+    if include_required_references:
+        for reference in contract.get("required_references", []):
+            if reference not in text:
+                errors.append(f"README missing required reference: {reference}")
 
     expected_claim_fields = ["claim", "source", "status", "supports", "limits", "source_revision", "recorded_at"]
     if contract.get("schema_version") != "content-generation.readme-contract.v2":
@@ -371,20 +638,50 @@ def check_readme(root: Path) -> list[str]:
     image_refs = re.findall(r"!\[[^\]]*\]\(([^)]+)\)", text)
     image_refs.extend(re.findall(r"<img[^>]+src=[\"']([^\"']+)[\"']", text, flags=re.IGNORECASE))
     local_image_refs = [ref for ref in image_refs if not ref.startswith(("http://", "https://", "#"))]
+    referenced_image_paths = {
+        ref.split("#", 1)[0].split("?", 1)[0].strip("<>").replace("\\", "/")
+        for ref in local_image_refs
+    }
     minimum_images = int(visual_policy.get("minimum_narrative_images_for_this_helper", 0))
-    if len(local_image_refs) < minimum_images:
+    raster_image_paths = {
+        path for path in referenced_image_paths
+        if Path(path).suffix.lower() in NARRATIVE_RASTER_SUFFIXES
+    }
+    if len(raster_image_paths) < minimum_images:
         errors.append(
             "README must reference at least "
-            f"{minimum_images} local narrative image(s); found {len(local_image_refs)}"
+            f"{minimum_images} local raster narrative image(s); found {len(raster_image_paths)}"
         )
     for reference in local_image_refs:
-        image_path = reference.split("#", 1)[0].strip("<>")
-        if not (root / image_path).is_file():
+        image_path = reference.split("#", 1)[0].split("?", 1)[0].strip("<>")
+        if not (readme_root / image_path).is_file():
             errors.append(f"README image does not exist: {image_path}")
 
-    for guide in visual_policy.get("required_guides", []):
-        if not (root / guide).is_file():
-            errors.append(f"missing required image guide or record: {guide}")
+    if visual is not None and manifest is not None:
+        narrative_roles = visual.get("narrative_roles", [])
+        narrative_paths = {
+            str(asset.get("path", "")).replace("\\", "/")
+            for asset in manifest.get("assets", [])
+            if any(
+                str(asset.get("role", "")).lower() == str(marker).lower()
+                or str(asset.get("role", "")).lower().startswith(f"{str(marker).lower()} ")
+                for marker in narrative_roles
+            )
+        }
+        linked_narrative_rasters = {
+            path for path in referenced_image_paths
+            if path in narrative_paths and Path(path).suffix.lower() in NARRATIVE_RASTER_SUFFIXES
+        }
+        if len(linked_narrative_rasters) < minimum_images:
+            errors.append(
+                "README must link at least "
+                f"{minimum_images} raster assets declared with narrative roles; found {len(linked_narrative_rasters)}"
+            )
+
+    if check_guides:
+        for guide in visual_policy.get("required_guides", []):
+            if not (readme_root / guide).is_file():
+                errors.append(f"missing required image guide or record: {guide}")
 
     return errors
 
@@ -427,6 +724,28 @@ def check(root: Path) -> list[str]:
         errors.append("system-version.json claim_explanation_contract must be required from 0.4.0")
     if claim_contract.get("optional_fields") != ["valid_time"] or not claim_contract.get("temporal_model"):
         errors.append("system-version.json claim_explanation_contract must define the valid-time model")
+    boundary_contract = version.get("boundary_disclosure_contract", {})
+    if _version_tuple(version.get("version")) >= (0, 4, 1):
+        if boundary_contract.get("version") != "content-generation.must-preserve.v1":
+            errors.append("system-version.json must declare content-generation.must-preserve.v1 from 0.4.1")
+        if boundary_contract.get("field") != "project-brief.v2.must_preserve":
+            errors.append("system-version.json boundary_disclosure_contract must name project-brief.v2.must_preserve")
+        if boundary_contract.get("inventory_field") != "project-brief.v2.boundaries":
+            errors.append("system-version.json boundary_disclosure_contract must name project-brief.v2.boundaries as its inventory")
+        if boundary_contract.get("minimum") != 1 or boundary_contract.get("maximum") != 8:
+            errors.append("system-version.json boundary_disclosure_contract must require one to eight disclosures")
+        if boundary_contract.get("required_for_helper_version") != "0.4.1":
+            errors.append("system-version.json boundary disclosure must be required from 0.4.1")
+        if not boundary_contract.get("readme_rule"):
+            errors.append("system-version.json boundary_disclosure_contract must define its README rule")
+    if _version_tuple(version.get("version")) >= (0, 4, 2):
+        citation_contract = version.get("citation_presentation_contract", {})
+        if citation_contract.get("version") != "content-generation.citation-presentation.v1":
+            errors.append("system-version.json must declare content-generation.citation-presentation.v1 from 0.4.2")
+        if not citation_contract.get("rule"):
+            errors.append("system-version.json citation_presentation_contract must define its display rule")
+        if citation_contract.get("required_for_helper_version") != "0.4.2":
+            errors.append("system-version.json citation presentation must be required from 0.4.2")
     scanability = version.get("scanability_contract", {})
     if scanability.get("version") != "content-generation.scanability.v1":
         errors.append("system-version.json must declare content-generation.scanability.v1")
@@ -441,6 +760,7 @@ def check(root: Path) -> list[str]:
             errors.append(f"module entry point is over 500 lines: {path.relative_to(root)}")
 
     required_schemas = {
+        "adapter-system-version.schema.json",
         "project-brief.schema.json",
         "project-brief.v2.schema.json",
         "asset-manifest.schema.json",
@@ -462,6 +782,7 @@ def check(root: Path) -> list[str]:
             errors.append(f"missing versioned helper contract file: {relative_path}")
 
     for name in (
+        "system-version.json",
         "project-brief.json",
         "brand-language.json",
         "visual-style.json",
@@ -481,7 +802,12 @@ def check(root: Path) -> list[str]:
     return errors
 
 
-def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
+def check_adapter(
+    adapter: Path,
+    project_root: Path | None = None,
+    *,
+    helper_root: Path | None = None,
+) -> list[str]:
     errors: list[str] = []
     required = {
         "system-version.json": "content-generation.adapter.v1",
@@ -505,6 +831,12 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
     for field in ("helper_repository", "helper_version", "helper_commit"):
         if not system.get(field):
             errors.append(f"adapter system-version.json missing {field}")
+    if system.get("helper_repository") and not _valid_web_uri(system["helper_repository"]):
+        errors.append("adapter system-version.json helper_repository must be a direct HTTP(S) URL")
+    if system.get("helper_version") and not re.fullmatch(r"\d+\.\d+\.\d+", str(system["helper_version"])):
+        errors.append("adapter system-version.json helper_version must use semantic-version form")
+    if system.get("helper_commit") and not re.fullmatch(r"(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})", str(system["helper_commit"])):
+        errors.append("adapter system-version.json helper_commit must be a full commit ID")
     if not system.get("modules") or set(system["modules"]) != EXPECTED_MODULES:
         errors.append("adapter system-version.json modules do not match the helper contract")
 
@@ -529,6 +861,53 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
             readme_text = (project_root / "README.md").read_text(encoding="utf-8")
         errors.extend(check_project_brief_v2(project, readme_text))
 
+    if helper_version >= (0, 4, 1):
+        boundaries = project.get("boundaries")
+        if not isinstance(boundaries, list) or not boundaries:
+            errors.append(
+                "project-brief.json boundaries must contain at least one declared boundary for helper versions 0.4.1 and later"
+            )
+            declared_boundaries: list[str] = []
+        else:
+            declared_boundaries = [
+                boundary for boundary in boundaries if isinstance(boundary, str) and boundary.strip()
+            ]
+            if len(declared_boundaries) != len(boundaries):
+                errors.append("project-brief.json boundaries entries must be non-empty strings")
+
+        must_preserve = project.get("must_preserve")
+        if not isinstance(must_preserve, list) or not must_preserve:
+            errors.append(
+                "project-brief.json must_preserve must contain at least one evidence-backed boundary for helper versions 0.4.1 and later"
+            )
+            disclosures: list[str] = []
+        else:
+            disclosures = [value for value in must_preserve if isinstance(value, str) and value.strip()]
+            if len(disclosures) != len(must_preserve):
+                errors.append("project-brief.json must_preserve entries must be non-empty strings")
+            if len(disclosures) > 8:
+                errors.append("project-brief.json must_preserve must contain no more than eight boundaries")
+        target_readme = project_root / "README.md" if project_root else None
+        if target_readme is None or not target_readme.is_file():
+            errors.append("must_preserve validation requires the target README")
+        else:
+            target_text = target_readme.read_text(encoding="utf-8")
+            for boundary in declared_boundaries:
+                if boundary not in target_text:
+                    errors.append(
+                        f"declared boundary is not stated in the target README: {boundary}"
+                    )
+            for disclosure in disclosures:
+                if disclosure not in target_text:
+                    errors.append(
+                        f"must_preserve boundary is not stated in the target README: {disclosure}"
+                    )
+        for disclosure in disclosures:
+            if disclosure not in declared_boundaries:
+                errors.append(
+                    f"must_preserve entry is not a declared boundary: {disclosure}"
+                )
+
     brand = values.get("brand-language.json", {})
     for field in ("name", "personality", "promise", "avoid"):
         if not brand.get(field):
@@ -550,6 +929,18 @@ def check_adapter(adapter: Path, project_root: Path | None = None) -> list[str]:
                 errors.append(f"asset does not exist under project root: {asset_path}")
     if helper_version >= (0, 3, 0):
         errors.extend(check_narrative_assets(visual, manifest, project_root))
+    if project_root and helper_root and (project_root / "README.md").is_file():
+        errors.extend(
+            check_readme(
+                helper_root,
+                project_root,
+                visual=visual,
+                manifest=manifest,
+                include_required_references=False,
+                check_guides=False,
+                enforce_sections=False,
+            )
+        )
     return errors
 
 
@@ -561,7 +952,13 @@ def main() -> int:
     args = parser.parse_args()
     errors = check(args.root.resolve())
     if args.adapter:
-        errors.extend(check_adapter(args.adapter.resolve(), args.project_root.resolve() if args.project_root else None))
+        errors.extend(
+            check_adapter(
+                args.adapter.resolve(),
+                args.project_root.resolve() if args.project_root else None,
+                helper_root=args.root.resolve(),
+            )
+        )
     if errors:
         print("INVALID")
         for error in errors:

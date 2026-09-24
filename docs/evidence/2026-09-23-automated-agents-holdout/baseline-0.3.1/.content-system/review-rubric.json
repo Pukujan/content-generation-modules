@@ -1,0 +1,37 @@
+{
+  "schema_version": "content-generation.review-rubric.v1",
+  "dimensions": [
+    {
+      "id": "human_comprehension",
+      "question": "Can a first-time reader explain why a bounded career research proposal exists after twenty seconds?",
+      "weight": 2
+    },
+    {
+      "id": "specificity",
+      "question": "Does the output name the task packet, role and profile evidence, focused research, proposal, and owner decision boundary?",
+      "weight": 2
+    },
+    {
+      "id": "claim_safety",
+      "question": "Are shipped, experimentally supported, planned, and unknown claims traced to the pinned target, with no runtime behavior invented?",
+      "weight": 3
+    },
+    {
+      "id": "skimmability",
+      "question": "Can a reader recover the problem, promise, mechanism, boundary, and next action from headings, bold anchors, and links?",
+      "weight": 1
+    },
+    {
+      "id": "visual_clarity",
+      "question": "Do the two raster images explain distinct ideas without covering the subjects or implying unsupported capabilities?",
+      "weight": 2
+    },
+    {
+      "id": "responsive_fit",
+      "question": "Do title, subtitle, subjects, mechanism, and stop boundary remain useful when the wide assets are stacked on narrow screens?",
+      "weight": 1
+    }
+  ],
+  "decision_rule": "Accept only when claim_safety passes and no weighted dimension is below 3/5; human review can override model scores with a recorded reason.",
+  "human_review_notes": "The target has no implementation or tests at the pinned commit. Review must preserve the public/private FOSSIL boundary, distinguish the manual handoff experiment from shipped runtime, and treat docs/PLAN.md as an unresolved repository issue."
+}
