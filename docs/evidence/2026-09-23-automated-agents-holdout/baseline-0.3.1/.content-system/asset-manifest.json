@@ -1,0 +1,42 @@
+{
+  "schema_version": "content-generation.asset-manifest.v1",
+  "system_version": "0.3.1",
+  "assets": [
+    {
+      "path": "assets/automated-agents-hero.png",
+      "role": "README hero story introduction",
+      "orientation": "wide",
+      "dimensions": "1536x1024",
+      "text_policy": "Exact short title plus subtitle in a quiet panel; no extra slogans or relied-on decorative lettering.",
+      "prompt_recipe": "A thoughtful human career researcher and friendly story-guide companion in an original anime-inspired blue-violet evening workspace move from a target role to profile evidence to a next proposal; exact title Automated Agents; exact subtitle A bounded career research system turns uncertainty into evidence and a next proposal.",
+      "exact_title": "Automated Agents",
+      "exact_subtitle": "A bounded career research system turns uncertainty into evidence and a next proposal.",
+      "alt_text": "A thoughtful researcher and friendly story-guide companion move from a target role and profile evidence to a labeled next proposal.",
+      "usage": "Place directly below the README title and subtitle as the wide story introduction.",
+      "crop_behavior": "Keep the title panel, researcher, companion, and role-evidence-proposal path visible on wide, tablet, and narrow crops.",
+      "rejection_conditions": "Reject if the exact copy changes, becomes unreadable, the human/companion relationship is unclear, the path is hidden, or the scene implies autonomous action, fake metrics, generic cyberpunk, or a dense dashboard.",
+      "review_decision": "accepted after full-size inspection; exact title and subtitle are readable, the subject relationship is clear, and the role-to-evidence-to-proposal path is visible.",
+      "provider": "built-in image_gen",
+      "prompt_record": ".content-system/image-prompts.md",
+      "hash": "e17f69f3d68a88c9bad024455d89ca230251dbfb3da8d069b732402054496330"
+    },
+    {
+      "path": "assets/automated-agents-boundaries.png",
+      "role": "README supporting mechanism and boundary explanation",
+      "orientation": "wide",
+      "dimensions": "1536x1024",
+      "text_policy": "Exact short title plus subtitle in a quiet panel; short functional board annotations directly explain the declared mechanism and boundary.",
+      "prompt_recipe": "A different original anime-inspired evening workspace shows a human researcher and friendly story-guide companion reviewing task packet, target role and profile, focused research, proposal, private evidence, and an out-of-scope stop boundary; exact title Automated Agents; exact subtitle A bounded career research system turns uncertainty into evidence and a next proposal.",
+      "exact_title": "Automated Agents",
+      "exact_subtitle": "A bounded career research system turns uncertainty into evidence and a next proposal.",
+      "alt_text": "A researcher and companion review a bounded path from task packet through role and profile, focused research, and a proposal beside an out-of-scope stop boundary.",
+      "usage": "Place after the opening problem paragraph to explain how a task packet becomes focused research and a labeled proposal while external action stays out of scope.",
+      "crop_behavior": "Keep the exact copy, four-stage path, private-evidence marker, and stop boundary visible when the image is stacked on narrow screens.",
+      "rejection_conditions": "Reject if the exact copy changes, the four-stage path or stop boundary disappears, the board becomes dense fake UI, the human/companion relationship is unclear, or the scene implies a running crawler, external outreach, publishing, or profile editing.",
+      "review_decision": "accepted after full-size inspection; it is distinct from the hero, makes the bounded mechanism and stop boundary visible, and keeps the title/subtitle readable. Functional stage annotations are retained because they explain the mechanism rather than act as decorative pseudo-text.",
+      "provider": "built-in image_gen",
+      "prompt_record": ".content-system/image-prompts.md",
+      "hash": "0a42af1711eac093ad800ea080c2d079e8c3b6565d4573b73fcec463d1abe686"
+    }
+  ]
+}

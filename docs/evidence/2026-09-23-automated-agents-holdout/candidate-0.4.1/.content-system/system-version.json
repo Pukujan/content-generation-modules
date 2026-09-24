@@ -1,0 +1,16 @@
+{
+  "schema_version": "content-generation.adapter.v1",
+  "helper_repository": "https://github.com/Pukujan/content-generation-modules",
+  "helper_version": "0.4.1",
+  "helper_commit": "865199f63ac33154bc521eb5211d10156827cad1",
+  "modules": [
+    "brand-foundation",
+    "content-context",
+    "writing-direction",
+    "visual-direction",
+    "image-generation",
+    "html-demo"
+  ],
+  "target_repository": "Pukujan/automated-agents",
+  "target_commit": "f2a542858f6b84923b61b710b6a775c0a050b785"
+}

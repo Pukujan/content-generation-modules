@@ -69,6 +69,12 @@ A six-run batch completed on 2026-09-23 using three fresh GPT-5.6-Luna sessions 
 
 The next candidate adds a source-mapped boundary inventory, evidence-backed `must_preserve` selections, and a deterministic README coverage check. Keep the exact private fixture and scoring key unavailable to generation agents. A public target permits the model to have seen its facts in pretraining, so do not describe this as proof of training-data novelty.
 
+## Follow-up blind transfer (2026-09-24)
+
+A fresh GPT-5.6-Luna task received a private target and CGM `0.4.1` at commit `3cb4aca892b5f8ccbbad6dcd1dfeb75d4efa6c03`, with no prior review conversation. It produced a story-first README, adapter, and two ChatGPT-generated raster images; one image candidate was rejected and regenerated. The final package passed the deterministic adapter validator and a separate local README-link check. The target checkout remained read-only.
+
+This is one positive transfer sample, not a repeatability result. Responsive rendering, source-by-source fact review, and owner visual approval remain open. The target-specific files and target identity stay local because the target repository is private. The public record and verifiable output digests are in [`docs/evidence/2026-09-23-automated-agents-holdout/BLIND_LUNA_TRANSFER.md`](evidence/2026-09-23-automated-agents-holdout/BLIND_LUNA_TRANSFER.md); the paired public before-and-after packages are documented in that folder’s [`README.md`](evidence/2026-09-23-automated-agents-holdout/README.md).
+
 ## What this catches from the previous failure
 
 The earlier target could pass while producing the wrong result because its adapter explicitly asked for text-free SVG diagrams and its old helper version did not require image-generation provenance or exact narrative copy. A private holdout containing that legacy shape tests whether a future agent follows the current target contract and upgrades the adapter instead of repeating the old instruction literally.

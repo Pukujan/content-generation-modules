@@ -1,0 +1,212 @@
+{
+  "schema_version": "content-generation.project-brief.v2",
+  "project": "Automated Agents",
+  "audience": [
+    "the owner making a bounded career or positioning decision",
+    "maintainers extending a documentation-first research system",
+    "researchers who need evidence-aware next actions"
+  ],
+  "problem": "Career and positioning questions arrive as scattered role, profile, public-research, and proposal fragments; without explicit budgets and evidence boundaries, a recommendation can sound like proof or permission.",
+  "solution": "A versioned design for bounded, read-only research exploration and role-specific proposals that keep observations, hypotheses, execution authorization, and personal evidence separate.",
+  "mechanism": [
+    "Choose one research question and a small seed set.",
+    "Set page, time, depth, comment-expansion, and stop budgets before intended visible collection.",
+    "Checkpoint observations, provenance, missing data, and coverage limits.",
+    "Route supplied role, profile, and research material to bounded research, hiring-coach, brand, or strategy proposals.",
+    "Keep public generic design in Git, personal evidence and proposals in private FOSSIL, and queues/checkpoints in local operational state."
+  ],
+  "evidence": [
+    {
+      "claim": "The repository describes itself as a personal-brand and career research system built in usable slices, and its current state is versioned design and agent instructions.",
+      "source": "Pinned repository README",
+      "status": "shipped",
+      "supports": "The public repository contains the stated product description and current-state qualification.",
+      "limits": "The README does not establish a running agent runtime, user outcome, or production deployment.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "README.md current-state statement",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "README.md",
+        "locator": "lines 1-11",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/README.md"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The communication workflow is marked design_only and assigns module ownership, inputs, outputs, and prohibitions.",
+      "source": "Communication manifest",
+      "status": "shipped",
+      "supports": "The YAML file records a research-to-strategy-proposal workflow and role boundaries.",
+      "limits": "A manifest is not proof that a controller, collector, or dispatcher executes the listed rules.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "communication-manifest.yaml workflow and status",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "config/communication-manifest.yaml",
+        "locator": "lines 1-55",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/config/communication-manifest.yaml"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The intended first slice is bounded visible research followed by a structured capture batch, evidence brief, and provisional strategy recommendation.",
+      "source": "First-slice brief",
+      "status": "planned",
+      "supports": "The document specifies the question, budgets, visible exploration, incremental checkpointing, report, and proposal steps.",
+      "limits": "It explicitly leaves browser implementation and scheduling unfinished and does not prove that the FOSSIL adapter exists.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "first-slice deliverable and steps",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "docs/first-slice.md",
+        "locator": "lines 5-27",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/docs/first-slice.md"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The hiring coach contract defines role assessment, targeted collection, network research, LinkedIn planning, and a prioritized next proposal.",
+      "source": "Hiring coach instructions",
+      "status": "shipped",
+      "supports": "The instruction file defines five output sections and requires evidence-aware labels, budgets, stop conditions, assumptions, and review dates.",
+      "limits": "The file is an instruction contract rather than an executable agent or persisted result.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "hiring coach v0.1 active composite agent",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "modules/hiring-coach/instructions.md",
+        "locator": "lines 1-17",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/modules/hiring-coach/instructions.md"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The target separates decision ownership and keeps recommendations, execution authorization, evidential support, and profile adoption distinct.",
+      "source": "Shared policy",
+      "status": "shipped",
+      "supports": "The policy assigns responsibility to research, brand, strategy, planner, writer, and editor, and states that every strategy remains a proposal.",
+      "limits": "The policy explicitly says runtime enforcement is not yet implemented.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "policy decision ownership and proposal boundary",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "policy.md",
+        "locator": "lines 3-7 and 27-31",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/policy.md"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "Public Git, private FOSSIL, local operational state, and derived reports have separate intended authorities.",
+      "source": "Storage and FOSSIL integration",
+      "status": "shipped",
+      "supports": "The storage document names the authority for generic design, private evidence and hypotheses, local queues and checkpoints, and derived reports.",
+      "limits": "The document proposes a future adapter and does not establish production persistence, encryption, or off-device backup.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "storage authority and minimal adapter proposal",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "docs/storage.md",
+        "locator": "lines 3-27",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/docs/storage.md"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The repository records a partial manual supervised browser path as continuation context.",
+      "source": "Current handoff",
+      "status": "experimentally_supported",
+      "supports": "The handoff records the path verified in the owner's logged-in Brave session and identifies a next bounded seed-selection task.",
+      "limits": "It is not a reproducible public capture, a population sample, or evidence of a running crawler or browser automation.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "handoff state and next task",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "docs/handoff.md",
+        "locator": "lines 3-19",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/docs/handoff.md"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The planner contract is a legacy draft and is not an enforced interface.",
+      "source": "Campaign planner instructions",
+      "status": "shipped",
+      "supports": "The instructions explicitly qualify the initial contract as a legacy draft to revise before wiring the module.",
+      "limits": "This qualification applies to the planner contract and does not prove a replacement contract or runtime wiring exists.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "planner contract qualification",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "modules/planner/instructions.md",
+        "locator": "lines 1-7",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/modules/planner/instructions.md"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    },
+    {
+      "claim": "The durable plan referenced by the repository is not recoverable as a plan in the pinned revision.",
+      "source": "docs/PLAN.md",
+      "status": "unknown",
+      "supports": "The pinned file contains a missing-file note rather than a durable plan or approved roadmap content.",
+      "limits": "This absence does not establish that no private or external plan exists; it only limits what can be claimed from the pinned public revision.",
+      "source_revision": {
+        "kind": "repository_artifact",
+        "reference": "docs/PLAN.md pinned contents",
+        "repository": "Pukujan/automated-agents",
+        "commit": "f2a542858f6b84923b61b710b6a775c0a050b785",
+        "path": "docs/PLAN.md",
+        "locator": "entire file",
+        "uri": "https://github.com/Pukujan/automated-agents/blob/f2a542858f6b84923b61b710b6a775c0a050b785/docs/PLAN.md"
+      },
+      "recorded_at": "2026-09-23T12:00:00-04:00",
+      "cite_in_readme": true
+    }
+  ],
+  "boundaries": [
+    "Recommendations are proposals until the owner approves them.",
+    "Read-only collection does not authorize contact, connection requests, reactions, applications, publication, or profile edits.",
+    "Personal evidence and proposals stay outside the public repository in private FOSSIL.",
+    "Runtime enforcement, browser automation, scheduling, and production persistence are future work."
+  ],
+  "must_preserve": [
+    "The browser crawler, live viewer, scheduled runs, and production FOSSIL adapter are not implemented.",
+    "Personal evidence and proposals belong in a private FOSSIL pack.",
+    "Existing JSON contracts are early drafts, not enforced runtime boundaries.",
+    "No publication, outreach, or brand-profile adoption is implied."
+  ],
+  "terminology": {
+    "preferred": {
+      "agent output": "proposal or review artifact",
+      "crawl": "bounded visible exploration",
+      "proof": "observed evidence with a stated source and limit",
+      "memory": "versioned private result or local checkpoint",
+      "automation": "future runtime work unless explicitly implemented"
+    },
+    "avoid": [
+      "autonomous career agent",
+      "guaranteed role fit",
+      "proven personal brand",
+      "production crawler",
+      "automatic outreach",
+      "seamless",
+      "revolutionary"
+    ]
+  }
+}

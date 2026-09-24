@@ -1,0 +1,59 @@
+{
+  "schema_version": "content-generation.visual-style.v1",
+  "reference_asset": "assets/readme/hero.png",
+  "generation_workflow": "built-in image_gen",
+  "narrative_roles": [
+    "hero",
+    "problem",
+    "supporting"
+  ],
+  "palette": {
+    "background": "#111B4D",
+    "primary": "#8F7CFF",
+    "accent": "#63D9FF",
+    "warm_accent": "#FF8A70",
+    "text": "#F4F1FF",
+    "confirmation": "#94E3CB",
+    "evidence_highlight": "#FFD28A"
+  },
+  "subjects": [
+    "an original thoughtful career researcher",
+    "a small friendly story-guide companion",
+    "blank evidence cards and simple boundary symbols"
+  ],
+  "composition": [
+    "one dominant idea per image",
+    "human and companion remain visible",
+    "reserve quiet space for exact title and subtitle copy",
+    "keep important subjects and copy crop-safe",
+    "supporting assets explain a different question from the hero"
+  ],
+  "text_policy": "Narrative raster assets carry the exact short title Automated Agents and exact subtitle A research-first design for bounded career and positioning proposals.; no extra labels, fake metrics, dense UI copy, or decorative pseudo-text.",
+  "roles": {
+    "hero": {
+      "orientation": "wide",
+      "dimensions": "1672x941 PNG",
+      "message": "Move from a research question toward a bounded proposal."
+    },
+    "problem": {
+      "orientation": "wide",
+      "dimensions": "1672x941 PNG",
+      "message": "Separate public design, private evidence, and local checkpoints before review."
+    },
+    "supporting": {
+      "orientation": "wide",
+      "dimensions": "1672x941 PNG",
+      "message": "Make the storage and decision boundary visible without implying runtime capability."
+    }
+  },
+  "reject_when": [
+    "extra readable words beyond the exact title and subtitle",
+    "garbled or crowded copy",
+    "decorative pseudo-text or dense fake UI",
+    "covered human or companion",
+    "generic dashboard or cyber imagery",
+    "unsupported crawler, scheduler, FOSSIL, publication, outreach, or profile-editing implication",
+    "supporting image repeats the hero instead of explaining a distinct boundary"
+  ],
+  "fallback_note": "The target revision has no accepted visual contract; this package uses the pinned CGM fallback direction with original characters and target-specific scenes."
+}

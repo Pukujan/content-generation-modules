@@ -1,0 +1,62 @@
+{
+  "schema_version": "content-generation.visual-style.v1",
+  "reference_asset": "Pinned helper fallback: content-generation-modules 8d4f041e8b82f007000b3a1b83d08c39616cc8c7 docs/BRAND_DIRECTION.md; target has no stronger visual contract.",
+  "generation_workflow": "built-in image_gen",
+  "narrative_roles": [
+    "hero",
+    "problem",
+    "supporting",
+    "evidence",
+    "story",
+    "social"
+  ],
+  "palette": {
+    "background": "#111B4D night ink with deep blue-violet evening light",
+    "primary": "#8F7CFF violet",
+    "accent": "#63D9FF cyan for evidence and connections",
+    "warm_accent": "#FF8A70 coral with #FFD28A gold",
+    "text": "#F4F1FF warm cream with #94E3CB mint for confirmation and boundaries"
+  },
+  "subjects": [
+    "an original thoughtful human career researcher",
+    "a small friendly story-guide companion",
+    "role, profile, evidence, proposal, and boundary artifacts"
+  ],
+  "composition": [
+    "one dominant explanatory idea per asset",
+    "keep the human and companion visible and unobstructed",
+    "use calm negative space for exact title and subtitle copy",
+    "make the evidence-to-proposal relationship readable at wide and narrow crops",
+    "do not copy helper characters, logos, or compositions"
+  ],
+  "text_policy": "Narrative raster assets carry the exact title Automated Agents plus the exact subtitle A bounded career research system turns uncertainty into evidence and a next proposal. Do not add slogans, fake metrics, or decorative pseudo-text; functional diagram annotations may appear only when they directly explain the declared mechanism.",
+  "roles": {
+    "hero": {
+      "orientation": "wide",
+      "dimensions": "1536x1024",
+      "crop": "Keep title panel, human, companion, and role-evidence-proposal path visible on wide, tablet, and narrow crops."
+    },
+    "problem": {
+      "orientation": "wide",
+      "dimensions": "1536x1024",
+      "crop": "Keep the bounded task path, private evidence marker, and out-of-scope stop boundary visible when stacked."
+    },
+    "system": {
+      "orientation": "square",
+      "dimensions": "1024x1024",
+      "crop": "Not generated for this package; reserve for a future square workflow asset."
+    },
+    "evidence": {
+      "orientation": "portrait",
+      "dimensions": "1024x1536",
+      "crop": "Not generated for this package; reserve for a future evidence asset."
+    }
+  },
+  "reject_when": [
+    "the title or subtitle is misspelled, changed, crowded, or unreadable",
+    "the image implies a running crawler, production FOSSIL adapter, autonomous outreach, publishing, or profile edits",
+    "the human/product relationship is ambiguous or the main subject is covered",
+    "the asset becomes generic cyberpunk, a dense dashboard, fake metrics, or a second hero",
+    "the declared crop loses the subject, mechanism, boundary, or orientation text"
+  ]
+}

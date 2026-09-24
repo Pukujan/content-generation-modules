@@ -1,0 +1,40 @@
+{
+  "schema_version": "content-generation.brand-language.v1",
+  "name": "Bounded career research",
+  "personality": [
+    "clear",
+    "careful",
+    "curious",
+    "evidence-aware",
+    "person-respecting"
+  ],
+  "audience_feeling": "Able to see what is known, what is proposed, and what to check next without being pushed into an action.",
+  "promise": "Turn one bounded career or positioning question into an inspectable next proposal while keeping evidence, approval, and execution separate.",
+  "preferred_terms": {
+    "bounded research": "a small, explicit exploration with budgets and stop conditions",
+    "proposal": "a recommendation that still needs owner review",
+    "evidence": "an observed or supplied source with provenance and limits",
+    "next action": "the smallest useful step that could change the recommendation",
+    "private FOSSIL": "the intended home for personal evidence, hypotheses, decisions, and outcome lineage"
+  },
+  "avoid": [
+    "autonomous",
+    "guaranteed",
+    "proven fit",
+    "growth hack",
+    "automatic outreach",
+    "seamless",
+    "revolutionary",
+    "the system understands you"
+  ],
+  "good_examples": [
+    "Ask one targeted research question, then record what would change the proposal.",
+    "The repository defines a next proposal; it does not authorize the external action.",
+    "This source supports the workflow shape, not a claim that the runtime exists."
+  ],
+  "bad_examples": [
+    "An autonomous agent finds your perfect role.",
+    "The crawler proves your market position.",
+    "The profile is automatically improved and published."
+  ]
+}
