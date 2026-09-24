@@ -85,6 +85,19 @@ Network resolution is an optional verification step. Offline validation checks i
 
 Deterministic checks do not inspect raster pixels or prove that a responsive crop behaves as described. The existing `exact_title`, `exact_subtitle`, `crop_behavior`, and `review_decision` fields keep those expectations explicit, but exact in-image copy, visual meaning, and wide/narrow crop acceptance remain human-review conditions under the unchanged image policy.
 
+## Human visual review rubric
+
+For each target-specific hero and supporting raster, a human reviewer should record whether:
+
+- the art fits the target project's own brand, audience, and supplied references;
+- the image communicates a clear product-relevant story rather than generic decoration;
+- hero and supporting assets have distinct, complementary roles rather than repeating one scene;
+- palette, composition, subject treatment, and typography feel cohesive across the set;
+- the rendered pixels contain the declared exact title and subtitle copy without garbling or contradiction;
+- the actual README/HTML rendering remains useful at desktop and mobile widths, including the declared crop-safe subjects and copy.
+
+These are acceptance judgments, not claims that a validator can prove an image is beautiful. Do not impose one global anime, robot, or character style: derive the art direction from the target's visual contract, audience, and supplied references. A deterministic validator may catch missing metadata or an explicit copy-policy contradiction, but the reviewer remains responsible for pixel-level quality, brand fit, story usefulness, and crop acceptance.
+
 ## Metamorphic tests
 
 Run each transformation as a separate fresh generation against a fixed task packet and compare the generated brief and README against the same semantic rubric. A static review of unchanged outputs can assess the expected oracle, but it is not an executed metamorphic run and must be recorded as `not_run`.

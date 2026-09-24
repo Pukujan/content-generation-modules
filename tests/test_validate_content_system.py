@@ -316,6 +316,43 @@ class ContentSystemValidationTests(unittest.TestCase):
         errors = check_narrative_assets(visual, {"assets": [asset]})
         self.assertTrue(any("usage declares a narrative role" in error for error in errors), errors)
 
+    def test_narrative_asset_rejects_copy_policy_contradictions_and_missing_copy_metadata(self):
+        asset = {
+            "path": "assets/hero.png",
+            "role": "hero",
+            "orientation": "wide",
+            "dimensions": "1600x900",
+            "text_policy": "Text-free raster; no labels, numbers, logos, or watermark.",
+            "prompt_recipe": (
+                "Exact title: Title. Exact subtitle: Subtitle. "
+                "Text (verbatim): none; no letters, words, numbers, logos, or watermark."
+            ),
+            "exact_title": "Title",
+            "exact_subtitle": "Subtitle",
+            "alt_text": "A clear story",
+            "usage": "README hero",
+            "crop_behavior": "center-safe",
+            "rejection_conditions": ["garbled copy"],
+            "review_decision": "accepted",
+            "provider": "built-in image_gen",
+            "prompt_record": "IMAGE_NOTES.md#hero",
+            "hash": "a" * 64,
+        }
+        visual = {"generation_workflow": "built-in image_gen", "narrative_roles": ["hero"]}
+
+        errors = check_narrative_assets(visual, {"assets": [asset]})
+
+        self.assertTrue(any("prohibits in-image copy" in error for error in errors), errors)
+
+        asset["text_policy"] = "Text-free except exact title and subtitle in a quiet panel."
+        asset["prompt_recipe"] = "Exact title: Title. Exact subtitle: Subtitle. Text-free except exact title and subtitle."
+        errors = check_narrative_assets(visual, {"assets": [asset]})
+        self.assertFalse(any("prohibits in-image copy" in error for error in errors), errors)
+
+        asset["exact_title"] = ""
+        errors = check_narrative_assets(visual, {"assets": [asset]})
+        self.assertTrue(any("missing exact_title" in error for error in errors), errors)
+
     def test_readme_minimum_counts_only_raster_images(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)

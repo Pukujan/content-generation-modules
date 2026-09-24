@@ -33,6 +33,15 @@ PROMPT_RECORD_HASH_RE = re.compile(
     r"^\s*(?:[-*]\s*)?(?:sha-?256|hash)\s*:\s*`?([0-9a-fA-F]+)`?\s*[.,]?\s*$",
     flags=re.IGNORECASE | re.MULTILINE,
 )
+COPY_PROHIBITION_RE = re.compile(
+    r"(?:\btext[\s-]*free\b|\bno\s+in[\s-]*image\s+copy\b|"
+    r"\btext\s*\(\s*verbatim\s*\)\s*:\s*none\b|\bno\s+(?:letters?|words?)\b)",
+    flags=re.IGNORECASE,
+)
+COPY_ALLOWANCE_RE = re.compile(
+    r"\b(?:except|allow|allows|include|includes|with)\b.{0,50}\b(?:title|subtitle|copy|text)\b",
+    flags=re.IGNORECASE | re.DOTALL,
+)
 WINDOWS_ABSOLUTE_PATH_RE = re.compile(
     r"(?<![\w])(?:[A-Za-z]:[\\/])(?:[^<>\s\[\]()`\"']+)",
     flags=re.IGNORECASE,
@@ -240,6 +249,17 @@ def _prompt_record_section(prompt_record_text: str, asset_path: str) -> str:
         if normalized_path in section.replace("\\", "/") or filename in section:
             return section
     return ""
+
+
+def _asset_copy_policy_contradiction(asset: dict) -> bool:
+    """Detect explicit no-copy language alongside required title/subtitle fields."""
+    if not asset.get("exact_title") or not asset.get("exact_subtitle"):
+        return False
+    for field in ("text_policy", "prompt_recipe"):
+        field_text = str(asset.get(field, ""))
+        if COPY_PROHIBITION_RE.search(field_text) and not COPY_ALLOWANCE_RE.search(field_text):
+            return True
+    return False
 
 
 def _check_prompt_record_hash(
@@ -459,6 +479,11 @@ def check_narrative_assets(
             errors.append(f"narrative asset prompt must include exact_title: {asset_path}")
         if str(asset.get("exact_subtitle", "")) not in prompt_recipe:
             errors.append(f"narrative asset prompt must include exact_subtitle: {asset_path}")
+        if _asset_copy_policy_contradiction(asset):
+            errors.append(
+                "narrative asset declares exact title/subtitle but its text policy or prompt "
+                f"prohibits in-image copy: {asset_path}"
+            )
 
         digest = str(asset.get("hash", ""))
         if not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
