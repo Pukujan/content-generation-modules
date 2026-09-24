@@ -15,11 +15,14 @@ An independent rendered review found that the images themselves fit at desktop (
 
 CGM `0.4.2` introduces a citation-presentation rule: keep immutable revisions in Markdown link destinations and show concise descriptive link labels. Its validator rejects raw unlinked web URLs in README prose while allowing URLs in Markdown destinations, HTML attributes, fenced code, and inline code. The check is covered by regression tests.
 
+A controlled presentation-only probe copied the local `0.4.1` package and changed only the fifteen visible raw-URL bullets into descriptive Markdown labels. The ordered sequence of all 45 URL strings in the README remained identical, preserving the citation destinations. The `0.4.2` validator returned `VALID` on the transformed copy. Chromium measured document widths of 1440px at a 1440px viewport, 768px at 768px, and 390px at 390px; all three images loaded and fit inside the page. This demonstrates the intended layout effect of the representation change, but it is not a new blind-generation run and does not show that a fresh agent will apply the rule without the validator.
+
 The generation rules do not change the image workflow, brand direction, exact title/subtitle requirements, raster requirement, or visual-review policy. The owner’s separate nine-image preference review is recorded in [`2026-09-24-owner-image-review.md`](2026-09-24-owner-image-review.md).
 
 ## Verification and remaining work
 
 - The new `0.4.2` validator flags all fifteen visible raw URLs in the saved `0.4.1` package.
+- In a copied package, changing only visible labels while preserving all 45 URL strings made the `0.4.2` validator pass and removed horizontal overflow at the tested widths.
 - CGM’s test suite passes 27 tests, including coverage that permits descriptive Markdown links and URLs in code examples.
 - The CGM root contract validator returns `VALID`.
 - A fresh blind generation using the pinned `0.4.2` helper is still required to verify that an independent agent follows the new rule in a completed README package.

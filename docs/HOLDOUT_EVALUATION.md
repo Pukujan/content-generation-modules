@@ -79,6 +79,8 @@ This is one positive transfer sample, not a repeatability result. Responsive ren
 
 A separate fresh GPT-6-Luna run against the same privately held target and CGM `0.4.1` produced three image assets and passed the pinned structural validator. Independent Chromium rendering found all three images fit at 1440px, 768px, and 390px, but the README's visible list of fifteen long source URLs expanded the document to 918px at a 390px viewport. The raw target package remains local. CGM `0.4.2` adds descriptive link labels and a deterministic check for visible raw URLs; the detailed privacy-safe finding is in [`docs/evidence/2026-09-24-citation-layout-holdout.md`](evidence/2026-09-24-citation-layout-holdout.md). A fresh blind generation under `0.4.2` is still needed before claiming the fix transfers.
 
+A controlled follow-up changed only those fifteen visible labels in a local copy, preserving the ordered sequence of all 45 source URL strings. The `0.4.2` validator then passed, and rendered page widths matched the viewport at 1440px, 768px, and 390px. This checks the presentation transformation and link preservation; it is not a fresh agent run. The blind `0.4.2` transfer remains in progress.
+
 ## What this catches from the previous failure
 
 The earlier target could pass while producing the wrong result because its adapter explicitly asked for text-free SVG diagrams and its old helper version did not require image-generation provenance or exact narrative copy. A private holdout containing that legacy shape tests whether a future agent follows the current target contract and upgrades the adapter instead of repeating the old instruction literally.
