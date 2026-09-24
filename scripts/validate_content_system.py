@@ -278,6 +278,10 @@ def _asset_copy_policy_contradiction(asset: dict) -> bool:
 
     for field in ("text_policy", "prompt_recipe"):
         field_text = str(asset.get(field, ""))
+        for copy_field in ("exact_title", "exact_subtitle"):
+            declared_copy = str(asset.get(copy_field, ""))
+            if declared_copy:
+                field_text = re.sub(re.escape(declared_copy), "", field_text, flags=re.IGNORECASE)
         if COPY_PROHIBITION_RE.search(field_text) and not has_clear_in_image_exception(field_text):
             return True
     return False

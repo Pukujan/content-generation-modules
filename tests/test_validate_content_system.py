@@ -344,6 +344,14 @@ class ContentSystemValidationTests(unittest.TestCase):
 
         self.assertTrue(any("prohibits in-image copy" in error for error in errors), errors)
 
+        asset["text_policy"] = "Render the declared title and subtitle in-image."
+        asset["prompt_recipe"] = (
+            "Exact title: Text-free retrieval pathway. Exact subtitle: Research first. "
+            "Explicit allowance: render that exact title and subtitle in-image."
+        )
+        errors = check_narrative_assets(visual, {"assets": [asset]})
+        self.assertFalse(any("prohibits in-image copy" in error for error in errors), errors)
+
         asset["text_policy"] = "Text-free except exact title and subtitle in the image's quiet panel."
         asset["prompt_recipe"] = "Exact title: Text-free retrieval pathway. Exact subtitle: Research first. Text-free except exact title and subtitle in-image."
         errors = check_narrative_assets(visual, {"assets": [asset]})
