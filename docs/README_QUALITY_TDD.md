@@ -76,11 +76,14 @@ Record task success, incorrect or missing answers, source-resolution success, an
 - The deterministic boundary gate checks declared-string coverage and `must_preserve` membership only; independent factual review must still assess whether source extraction missed exclusions, non-goals, not-implemented status, or owner/private-data limits.
 - Conflicting source scope is resolved before drafting: explicit non-goals and “not frozen” constraints are not overridden by a broad epic or a suggestive visual.
 - Existing image tests still require the declared narrative raster generation path, exact title/subtitle, prompt record, hash, and review evidence.
+- Offline README validation rejects malformed GitHub `blob`/`tree` links only when they visibly pin a full commit, checks narrative prompt-record SHA-256 declarations against the manifest and committed raster, and rejects common absolute Windows/user-home paths in prose while leaving fenced and inline code examples alone.
 - The target README itself is checked for linked, local narrative rasters; a source-map manifest cannot pass while the README omits those assets.
 - An asset whose usage calls it a README hero or supporting narrative cannot escape the image contract by labeling its manifest role `diagram`.
 - Markdown prompt-record anchors resolve to the underlying local file, while free-text descriptions do not count as file records.
 
 Network resolution is an optional verification step. Offline validation checks identity and shape; an online verifier may additionally confirm that a permalink and line locator still resolve.
+
+Deterministic checks do not inspect raster pixels or prove that a responsive crop behaves as described. The existing `exact_title`, `exact_subtitle`, `crop_behavior`, and `review_decision` fields keep those expectations explicit, but exact in-image copy, visual meaning, and wide/narrow crop acceptance remain human-review conditions under the unchanged image policy.
 
 ## Metamorphic tests
 

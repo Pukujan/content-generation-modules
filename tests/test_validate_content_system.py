@@ -133,6 +133,86 @@ class ContentSystemValidationTests(unittest.TestCase):
             errors = check_readme(target)
             self.assertTrue(any("bold scan anchor" in error for error in errors))
 
+    def test_readme_gate_rejects_malformed_commit_pinned_github_blob_links(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            (target / "templates").mkdir()
+            (target / "templates" / "readme-contract.json").write_bytes(
+                (ROOT / "templates" / "readme-contract.json").read_bytes()
+            )
+            commit = "d" * 40
+            (target / "README.md").write_text(
+                "# Project\n\n"
+                f"[Broken citation](https://github.com/Pukujan/demo/blob/{commit}#L14-L19)\n\n"
+                "[Branch citation](https://github.com/Pukujan/demo/blob/main/README.md)\n",
+                encoding="utf-8",
+            )
+
+            errors = check_readme(target)
+
+            self.assertTrue(any("commit-pinned GitHub blob/tree link" in error for error in errors), errors)
+
+    def test_readme_gate_rejects_absolute_local_paths_but_allows_code_examples(self):
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+            (target / "templates").mkdir()
+            (target / "templates" / "readme-contract.json").write_bytes(
+                (ROOT / "templates" / "readme-contract.json").read_bytes()
+            )
+            (target / "README.md").write_text(
+                "# Project\n\n"
+                "The generated handoff was written to C:\\Users\\pujan\\Documents\\handoff.md.\n\n"
+                "```powershell\n"
+                "Get-Content C:\\Users\\pujan\\Documents\\example.md\n"
+                "```\n",
+                encoding="utf-8",
+            )
+
+            errors = check_readme(target)
+
+            self.assertTrue(any("absolute local path" in error for error in errors), errors)
+            self.assertEqual(sum("absolute local path" in error for error in errors), 1, errors)
+
+    def test_prompt_record_hash_must_match_manifest_hash(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory)
+            (project / "assets").mkdir()
+            image = project / "assets" / "hero.png"
+            image.write_bytes(b"image bytes")
+            actual_hash = hashlib.sha256(image.read_bytes()).hexdigest()
+            wrong_hash = hashlib.sha256(b"different image bytes").hexdigest()
+            short_hash = wrong_hash[:-1]
+            (project / "assets" / "IMAGE_NOTES.md").write_text(
+                f"# Hero\n\n- Output: `assets/hero.png`\n"
+                f"- SHA-256: `{wrong_hash}`\n"
+                f"- SHA-256: `{short_hash}`\n",
+                encoding="utf-8",
+            )
+            asset = {
+                "path": "assets/hero.png",
+                "role": "hero",
+                "orientation": "wide",
+                "dimensions": "1600x900",
+                "text_policy": "exact copy",
+                "prompt_recipe": "Title / Subtitle",
+                "exact_title": "Title",
+                "exact_subtitle": "Subtitle",
+                "alt_text": "A clear story",
+                "usage": "README hero",
+                "crop_behavior": "center-safe",
+                "rejection_conditions": ["garbled copy"],
+                "review_decision": "accepted",
+                "provider": "built-in image_gen",
+                "prompt_record": "assets/IMAGE_NOTES.md#hero",
+                "hash": actual_hash,
+            }
+            visual = {"generation_workflow": "built-in image_gen", "narrative_roles": ["hero"]}
+
+            errors = check_narrative_assets(visual, {"assets": [asset]}, project)
+
+            self.assertTrue(any("prompt record hash does not match manifest" in error for error in errors), errors)
+            self.assertTrue(any("prompt record hash must be a SHA-256 digest" in error for error in errors), errors)
+
     def test_missing_module_is_reported(self):
         with tempfile.TemporaryDirectory() as directory:
             target = Path(directory)
@@ -200,7 +280,11 @@ class ContentSystemValidationTests(unittest.TestCase):
             (project / "assets").mkdir()
             image = project / "assets" / "hero.png"
             image.write_bytes(b"image bytes")
-            (project / "assets" / "IMAGE_NOTES.md").write_text("# Hero\nPrompt record", encoding="utf-8")
+            image_hash = hashlib.sha256(image.read_bytes()).hexdigest()
+            (project / "assets" / "IMAGE_NOTES.md").write_text(
+                f"# Hero\n\n- Output: `assets/hero.png`\n- SHA-256: `{image_hash}`\n",
+                encoding="utf-8",
+            )
             asset = {
                 "path": "assets/hero.png",
                 "role": "hero",

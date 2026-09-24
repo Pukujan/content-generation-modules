@@ -24,6 +24,23 @@ EXPECTED_MODULES = {
 
 NARRATIVE_ROLE_MARKERS = ("hero", "problem", "supporting", "evidence", "story", "social")
 NARRATIVE_RASTER_SUFFIXES = {".png", ".jpg", ".jpeg", ".webp"}
+FULL_COMMIT_RE = r"[0-9a-fA-F]{40}|[0-9a-fA-F]{64}"
+GITHUB_COMMIT_PINNED_LINK_RE = re.compile(
+    rf"https?://(?:www\.)?github\.com/[^\s<>()\[\]\"']+",
+    flags=re.IGNORECASE,
+)
+PROMPT_RECORD_HASH_RE = re.compile(
+    r"^\s*(?:[-*]\s*)?(?:sha-?256|hash)\s*:\s*`?([0-9a-fA-F]+)`?\s*[.,]?\s*$",
+    flags=re.IGNORECASE | re.MULTILINE,
+)
+WINDOWS_ABSOLUTE_PATH_RE = re.compile(
+    r"(?<![\w])(?:[A-Za-z]:[\\/])(?:[^<>\s\[\]()`\"']+)",
+    flags=re.IGNORECASE,
+)
+USER_HOME_PATH_RE = re.compile(
+    r"(?<![\w])(?:[\\/]+Users[\\/][A-Za-z0-9._-]+(?:[\\/][^<>\s\[\]()`\"']*)?)",
+    flags=re.IGNORECASE,
+)
 REQUIRED_NARRATIVE_ASSET_FIELDS = (
     "path",
     "role",
@@ -134,6 +151,127 @@ def _valid_repository_permalink(uri: object, repository: str, commit: str, sourc
         return False
     linked_path = "/".join(parts[commit_index + 1:])
     return linked_path == source_path or linked_path.startswith(f"{source_path}/")
+
+
+def _check_github_commit_pinned_links(readme_text: str) -> list[str]:
+    """Check only GitHub blob/tree URLs that visibly pin a full commit ID.
+
+    This is intentionally structural and offline. Branch links, issue links, and
+    ordinary external references are outside this check.
+    """
+    errors: list[str] = []
+    for match in GITHUB_COMMIT_PINNED_LINK_RE.finditer(readme_text):
+        raw_url = match.group(0).rstrip(".,;:!?")
+        try:
+            parsed = urlparse(raw_url)
+        except ValueError:
+            continue
+        if parsed.netloc.lower().removeprefix("www.") != "github.com":
+            continue
+        parts = [unquote(part) for part in parsed.path.split("/") if part]
+        if len(parts) < 4 or parts[2].lower() not in {"blob", "tree"}:
+            continue
+        if not re.fullmatch(FULL_COMMIT_RE, parts[3]):
+            continue
+        if len(parts) == 4:
+            errors.append(
+                "README contains a malformed commit-pinned GitHub blob/tree link "
+                f"(missing repository path): {raw_url}"
+            )
+    return errors
+
+
+def _user_facing_readme_lines(readme_text: str):
+    """Yield README lines with fenced and inline code removed."""
+    fence: str | None = None
+    for line_number, line in enumerate(readme_text.splitlines(), start=1):
+        fence_match = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if fence_match:
+            marker = fence_match.group(1)[0]
+            if fence is None:
+                fence = marker
+            elif marker == fence:
+                fence = None
+            continue
+        if fence is not None:
+            continue
+        without_inline_code = re.sub(r"`[^`\n]*`", "", line)
+        without_urls = re.sub(r"(?i)\b(?:https?|file)://[^\s<>()\[\]]+", "", without_inline_code)
+        yield line_number, without_urls
+
+
+def _check_readme_absolute_local_paths(readme_text: str) -> list[str]:
+    errors: list[str] = []
+    seen: set[tuple[int, str]] = set()
+    for line_number, line in _user_facing_readme_lines(readme_text):
+        windows_matches = list(WINDOWS_ABSOLUTE_PATH_RE.finditer(line))
+        home_matches = [
+            match
+            for match in USER_HOME_PATH_RE.finditer(line)
+            if not any(
+                windows.start() <= match.start() and windows.end() >= match.end()
+                for windows in windows_matches
+            )
+        ]
+        matches = windows_matches + home_matches
+        for match in matches:
+            path_text = match.group(0).rstrip(".,;:!?)]}")
+            key = (line_number, path_text)
+            if key in seen:
+                continue
+            seen.add(key)
+            errors.append(
+                "README contains an absolute local path in user-facing content "
+                f"at line {line_number}: {path_text}"
+            )
+    return errors
+
+
+def _prompt_record_section(prompt_record_text: str, asset_path: str) -> str:
+    """Return the Markdown section that records one asset, when identifiable."""
+    normalized_path = asset_path.replace("\\", "/")
+    filename = Path(normalized_path).name
+    headings = list(re.finditer(r"^#{1,6}\s+.+$", prompt_record_text, flags=re.MULTILINE))
+    if not headings:
+        return prompt_record_text
+    for index, heading in enumerate(headings):
+        end = headings[index + 1].start() if index + 1 < len(headings) else len(prompt_record_text)
+        section = prompt_record_text[heading.start():end]
+        if normalized_path in section.replace("\\", "/") or filename in section:
+            return section
+    return ""
+
+
+def _check_prompt_record_hash(
+    asset: dict,
+    image_path: Path,
+    manifest_digest: str,
+    prompt_record: Path,
+) -> list[str]:
+    errors: list[str] = []
+    try:
+        prompt_record_text = prompt_record.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        errors.append(f"narrative asset prompt record cannot be read: {asset.get('prompt_record')}")
+        return errors
+
+    asset_path = str(asset.get("path", ""))
+    section = _prompt_record_section(prompt_record_text, asset_path)
+    declared_hashes = [match.group(1) for match in PROMPT_RECORD_HASH_RE.finditer(section)]
+    if not declared_hashes:
+        errors.append(f"narrative asset prompt record missing SHA-256 declaration: {asset_path}")
+        return errors
+
+    actual_digest = hashlib.sha256(image_path.read_bytes()).hexdigest() if image_path.is_file() else None
+    for declared_hash in declared_hashes:
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", declared_hash):
+            errors.append(f"narrative asset prompt record hash must be a SHA-256 digest: {asset_path}")
+            continue
+        if declared_hash.lower() != manifest_digest.lower():
+            errors.append(f"narrative asset prompt record hash does not match manifest: {asset_path}")
+        if actual_digest is not None and declared_hash.lower() != actual_digest.lower():
+            errors.append(f"narrative asset prompt record hash does not match file: {asset_path}")
+    return errors
 
 
 def check_project_brief_v2(project: dict, readme_text: str | None = None) -> list[str]:
@@ -337,6 +475,15 @@ def check_narrative_assets(
                 actual_digest = hashlib.sha256(image_path.read_bytes()).hexdigest()
                 if actual_digest.lower() != digest.lower():
                     errors.append(f"narrative asset hash does not match file: {asset_path}")
+                if prompt_record.is_file():
+                    errors.extend(
+                        _check_prompt_record_hash(
+                            asset,
+                            image_path,
+                            digest,
+                            prompt_record,
+                        )
+                    )
 
     return errors
 
@@ -363,6 +510,8 @@ def check_readme(
         return [str(exc)]
 
     text = readme_path.read_text(encoding="utf-8")
+    errors.extend(_check_github_commit_pinned_links(text))
+    errors.extend(_check_readme_absolute_local_paths(text))
     if enforce_sections:
         for section in contract.get("required_sections", []):
             heading = section.get("heading")
