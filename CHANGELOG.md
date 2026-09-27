@@ -4,7 +4,8 @@
 
 - documented official short name **hsw** (also HSW) for the `human-sounding-writing` module in the skill frontmatter/body, soft writing router, AGENTS, README, and human-sounding guide;
 - canonical module id, folder name, and `EXPECTED_MODULES` entry remain `human-sounding-writing` (adapters keep that id);
-- docs/alias only — no module rename or router behavior change beyond naming the short alias.
+- rebuilt root README for ACS / Study-os pin path: current version near the top, seven-module catalog with paths and when-to-load, writing-router summary + hsw alias, adapter pin instructions (version/SHA, `.content-system/`, validator), tightened story while keeping required sections and marketing assets;
+- docs/alias + README contract refresh — no module rename or router behavior change beyond naming the short alias.
 
 ## 0.5.0 — draft
 
