@@ -52,13 +52,19 @@ Non-zero exit + `CGM_VERIFY ... status=FAIL` means the pin is incomplete.
 
 ## Output filenames (0.5.5+)
 
-ACS prompt inject must mention **output filenames** and asset-manifest paths,
-not titles only. After verify:
+ACS prompt inject must mention **output filenames**, asset-manifest paths, and
+**per-feature filename legends**, not titles only. After verify:
 
 - Generated artifact filenames / asset-manifest paths / committed media basenames
-  → `human-output-naming` (**hon**) (`required_load: true`)
-- Call `scripts/human_filename.build_basename` before writing new media
-- Do not emit classic `name-pN-<6hex>.ext` basenames on helper pins ≥ 0.5.5
+  / filename legends → `human-output-naming` (**hon**) (`required_load: true`)
+- Call `scripts/human_filename.build_basename` (speakable by default; optional
+  `style="safe_twin"`) before writing new media
+- Omit default pitch/speed from the basename (`Song Food – up 8.mp3`, not robot
+  `song-food_pitch-plus-8st_speed-0pct.mp3`)
+- Keep a per-feature legend under `docs/filename-legends/` (helper) or
+  `.content-system/filename-legends/` (adapter): glossary + associated paths
+- Do not emit classic `name-pN-<6hex>.ext` or robot key=value stems on helper
+  pins ≥ 0.5.5
 - Hash may remain a separate asset-manifest field
 
 Full contract: [`HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md). Soft router
@@ -74,8 +80,8 @@ After verify passes, agents **MUST load** modules per
 - PR titles/bodies, issue titles/bodies, issue-log titles, **commit messages /
   commit subjects**, non-README docs, changelog prose, posts/blogs/social/
   general prose/papers → `human-sounding-writing` (**hsw**) (`required_load: true`)
-- Generated artifact filenames, asset-manifest paths, committed media basenames
-  → `human-output-naming` (**hon**) (`required_load: true`)
+- Generated artifact filenames, asset-manifest paths, committed media basenames, filename legends
+  → `human-output-naming` (**hon**) (`required_load: true`; speakable + per-feature legend)
 
 No prose-style CI gate is implied. Soft = no NLP grader; still APPLY for agents.
 
