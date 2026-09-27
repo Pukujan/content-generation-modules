@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1 — draft
+
+- documented official short name **hsw** (also HSW) for the `human-sounding-writing` module in the skill frontmatter/body, soft writing router, AGENTS, README, and human-sounding guide;
+- canonical module id, folder name, and `EXPECTED_MODULES` entry remain `human-sounding-writing` (adapters keep that id);
+- docs/alias only — no module rename or router behavior change beyond naming the short alias.
+
 ## 0.5.0 — draft
 
 - added the `human-sounding-writing` module for posts, blogs, social copy, general agent prose, and papers or data writeups;
