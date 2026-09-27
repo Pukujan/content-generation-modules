@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.5 — draft
+
+- added `human-output-naming` (**hon**) module + `scripts/human_filename.py` so generated artifact / asset-manifest / media basenames use pronounceable labeled segments (e.g. `song-food_pitch-plus-8st_speed-0pct.mp3`) instead of hashy junk (`song_food-p0-00e86d.mp3`);
+- extended soft writing router + `acs_prompt_inject` with filename surfaces; sibling contract `docs/HUMAN_OUTPUT_NAMING.md` / `docs/human-output-naming.json`;
+- validator: `EXPECTED_MODULES` is now eight; fail closed if the filename helper API is missing when claimed; adapter smoke (helper ≥ 0.5.5) rejects classic `stem-pN-<6hex>.ext` basenames in asset-manifest paths (hash may remain an asset field);
+- ACS / full adapters must re-pin to **0.5.5** and include the 8th module; do not rewrite published blob history.
+
 ## 0.5.4 — draft
 
 - **adopter README product-only contract:** target READMEs must cover audience, problem, features, how it works, evidence for *their* claims, and a next action — not CGM, image-gen pipeline narration, or writing-methodology teaching;

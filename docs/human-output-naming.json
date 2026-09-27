@@ -1,0 +1,50 @@
+{
+  "schema_version": "content-generation.human-output-naming.v1",
+  "enforcement": "soft_labels_structural_basenames",
+  "application": "must_load",
+  "module": "human-output-naming",
+  "short_name": ["hon", "HON"],
+  "python_api": {
+    "module": "scripts.human_filename",
+    "path": "scripts/human_filename.py",
+    "required_symbols": ["build_basename", "is_hashy_junk_basename", "sanitize_label", "build_relative_path"],
+    "required_from_helper_version": "0.5.5"
+  },
+  "surfaces": [
+    "generated artifact filenames",
+    "asset-manifest paths",
+    "committed media basenames"
+  ],
+  "rules": [
+    "Every varying dimension that would collide if collapsed MUST appear as its own labeled segment.",
+    "Sanitize: lowercase; spaces to '-'; '+N' to 'plus-N'; '%' to 'pct'; strip unsafe chars; join segments with '_'.",
+    "Same ordered label set -> same basename (deterministic); different label sets -> different basenames.",
+    "Content hash may append as a short suffix AFTER human labels, never instead of them.",
+    "asset-manifest stores the human path; hash stays a separate asset field.",
+    "Do not rewrite published blob history; stop emitting new hashy basenames on pins >= 0.5.5."
+  ],
+  "hashy_junk_patterns": [
+    "stem-pN-<6hex>.ext (e.g. song_food-p0-00e86d.mp3, song_food-p20-8eb807.mp3)"
+  ],
+  "examples": [
+    {
+      "before": "song_food-p0-00e86d.mp3",
+      "after": "song-food_pitch-plus-8st_speed-0pct.mp3",
+      "dimensions": [["line", "song-food"], ["pitch", "+8st"], ["speed", "0%"]]
+    },
+    {
+      "before": "song_food-p20-8eb807.mp3",
+      "after": "song-food_pitch-plus-8st_speed-20pct.mp3",
+      "dimensions": [["line", "song-food"], ["pitch", "+8st"], ["speed", "20%"]]
+    }
+  ],
+  "apply_checklist": [
+    "Identify the naming surface (generated artifact filename, asset-manifest path, or committed media basename).",
+    "Collect ordered dimension labels for every colliding axis.",
+    "MUST load modules/human-output-naming/SKILL.md and call scripts/human_filename.build_basename before write.",
+    "Record the human path in the manifest; keep hash as a field (suffix only after human labels if needed).",
+    "Do not rewrite published blob history unless a scoped migration requires it."
+  ],
+  "required_from_helper_version": "0.5.5",
+  "acs_prompt_inject_note": "After hotload verify, mention output filenames and asset-manifest paths (not titles only): MUST load human-output-naming (hon) before naming generated artifacts."
+}

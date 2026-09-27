@@ -67,3 +67,16 @@ do not rename the folder or replace the id with `hsw`.
 - Pin helper **0.5.4+**. With `--adapter` + `--project-root`, the validator rejects `CGM` / `content-generation-modules` and the exact `## Image generation and use` heading in the target README.
 - The helper repository's own README may still document CGM workflow — that is unchanged.
 
+## Human output naming (0.5.5+)
+
+- New required module: `human-output-naming` (**hon**) for generated artifact filenames, asset-manifest paths, and committed media basenames.
+- Python API: `scripts/human_filename.py` (`build_basename`, `is_hashy_junk_basename`).
+- Soft router + ACS inject now mention output filenames (not titles only).
+- Before / after: `song_food-p0-00e86d.mp3` → `song-food_pitch-plus-8st_speed-0pct.mp3`.
+- Adapter steps:
+  1. Pin helper **0.5.5+** (version and commit).
+  2. Add `human-output-naming` to the adapter `modules` list (eight modules total).
+  3. Use `build_basename` for **new** asset paths; keep content hash as a separate asset field.
+  4. Do **not** rewrite published blob history unless a scoped migration requires it.
+- Docs: [`HUMAN_OUTPUT_NAMING.md`](HUMAN_OUTPUT_NAMING.md), [`human-output-naming.json`](human-output-naming.json).
+
