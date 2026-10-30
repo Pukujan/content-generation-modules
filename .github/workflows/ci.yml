@@ -28,9 +28,28 @@ jobs:
         with:
           script: |
             const body = context.payload.pull_request.body || "";
-            const match = body.match(/^\s*(?:Refs|Tracks|Tracking issue)\s*:?\s*#(\d+)\b/im);
+
+            // A mesh/sync head is the sync bot's mechanical bump of
+            // stack-mesh.json: generated, no authoring intent, and no tracking
+            // issue to name. This gate can therefore never pass it, which is why
+            // this repository's mesh has never converged through the bot. The
+            // train's own prose-pin check exempts mesh/sync for the same reason
+            // (a sync head legitimately takes a sibling's new version before the
+            // train records it). Pass explicitly rather than skipping the job, so
+            // the required check reports success instead of staying expected.
+            if (context.payload.pull_request.head.ref === "mesh/sync") {
+              core.info("mesh/sync: mechanical mesh bump; no tracked issue required.");
+              return;
+            }
+
+            const match = body.match(/^\s*(?:Closes|Fixes|Resolves|Refs|Tracks|Tracking issue)\s*:?\s*#(\d+)\b/im);
             if (!match) {
-              core.setFailed("PR body must identify its tracking issue, for example: Refs #123.");
+              core.setFailed(
+                "PR body must identify its tracking issue on its own line, for example: " +
+                "Closes #123 (closes the issue when the PR merges) or Refs #123 " +
+                "(links the issue without closing it). Accepted forms: Closes #N, Fixes #N, " +
+                "Resolves #N, Refs #N, Tracks #N, Tracking issue #N."
+              );
               return;
             }
 
